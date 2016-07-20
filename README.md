@@ -13,6 +13,7 @@ The environment variables PATH should have the search paths of PGI, NETCDF, and 
 and LD_LIBRARY_PATH should have the search paths of PGI, NETCDF, and MPICH shared libraries.
 
 The following is a sample .cshrc file configured for using pgi, mvapich2 and netcdf (on mc1.met.psu.edu):
+
     setenv PGI /usr/global/pgi
     setenv PATH $PGI/linux86-64/10.6/bin:$PATH
 
@@ -24,6 +25,7 @@ The following is a sample .cshrc file configured for using pgi, mvapich2 and net
     setenv LD_LIBRARY_PATH $NETCDF/lib:$LD_LIBRARY_PATH
 
 To compile:
+
     cd src
     cp Makefile.pgi Makefile
     make clean
@@ -36,6 +38,7 @@ II. using Intel compiler
 Similar with PGI compiler, the environment should be correctly configured for intel, mpich and netcdf.
 
 The following is a sample .bashrc file configured for using intel, mvapich2 and netcdf (on stampede.tacc.utexas.edu):
+
     export NETCDF="/opt/apps/intel13/netcdf/3.6.3"
     export PATH="$NETCDF/bin:$PATH"
     export LD_LIBRARY_PATH="$NETCDF/lib:$LD_LIBRARY_PATH"
@@ -49,6 +52,7 @@ The following is a sample .bashrc file configured for using intel, mvapich2 and 
     export LD_LIBRARY_PATH="$MPICH/lib:$MPICH/lib/shared:$LD_LIBRARY_PATH"
 
 To compile:
+
     cd src
     cp Makefile.intel Makefile
     make clean
@@ -57,11 +61,13 @@ To compile:
 
 Executables:
 ------------
-    If build is successful, you can find the following executables:
+
+If build is successful, you can find the following executables:
 
     enkf.mpi  - the main program of EnKF
 
-    Also some utility programs:
+Also some utility programs:
+
     enkf_gfs_hybrid_inflation.exe
     replace_perturbationmean_by_initial.exe
     replace_geo_by_initial.exe
@@ -69,4 +75,4 @@ Executables:
     soairborne_to_3dvar.exe
     so_to_3dvar.exe
 
-    If you only need enkf.mpi, simply use "make clean; make enkf.mpi"
+If you only need enkf.mpi, simply use `make clean; make enkf.mpi`.
