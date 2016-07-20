@@ -63,3 +63,7 @@ ensemble_mean.exe: module_structure.o mpi_module.o module_netcdf.o module_map_ut
 
 replace_mean.exe: module_netcdf.o
 	$(FC) -o replace_mean.exe $(FCFLAG) -Mfree -I$(NETCDF)/include module_netcdf.o -L$(NETCDF)/lib -lnetcdf replace_mean.f
+
+wrf2obs3dvar: module_netcdf.o module_map_utils.o module_structure.o module_wrf_tools.o
+	rm -f wrf2obs3dvar.exe
+	$(FC) -o wrf2obs3dvar.exe $(FCFLAG) -Mfree -I$(NETCDF)/include module_netcdf.o module_map_utils.o module_structure.o module_wrf_tools.o -L$(NETCDF)/lib -lnetcdf -lnetcdff wrf2obs3dvar.f time_calculation.f
