@@ -38,7 +38,7 @@ replace_mean.o:
 	$(FC) -c $(FCFLAG) -FR replace_mean.f
 
 enkf.mpi: module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o enkf.o
-	$(FC) -o enkf.mpi $(FCFLAG) -FR -I$(NETCDF)/include  module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o enkf.o -L$(NETCDF)/lib -lnetcdff main.f
+	$(FC) -o enkf.mpi $(FCFLAG) -FR -I$(NETCDF)/include  module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o enkf.o -L$(NETCDF)/lib -lnetcdf -lnetcdff main.f
 
 replace_perturbationmean_by_initial.exe: module_netcdf.o
 	$(FC) -o replace_perturbationmean_by_initial.exe $(FCFLAG) -FR -I$(NETCDF)/include module_netcdf.o -L$(NETCDF)/lib -lnetcdf -lnetcdff replace_perturbationmean_by_initial.f
