@@ -155,6 +155,14 @@ module namelist_define
    integer       :: hroi_airborne       ! horizontal radius of influence for airborne    
    integer       :: vroi_airborne       ! vertical radius of influence for airborne    
 
+!-- use_co2_tower
+   logical       :: use_co2_tower       ! .true. : assimilated CO2 tower data
+   integer       :: datathin_co2_tower  ! 0=all data, 2=1/2 data, 10=1/10 data
+                                        ! 2: get the 1st, 3rd, 5th ... data
+                                        !-2: get the 2nd, 4th, 6th ... data
+   integer       :: hroi_co2_tower      ! horizontal radius of influence for CO2 tower
+   integer       :: vroi_co2_tower      ! vertical radius of influence for CO2 tower
+
 !-- Namelist contents :
 
    namelist /enkf_parameter / numbers_en, expername, enkfvar, updatevar,                          &
@@ -176,6 +184,7 @@ module namelist_define
    namelist /gpspw_obs      / use_gpspw, datathin_gpspw, hroi_gpspw, vroi_gpspw
    namelist /radar_obs      / radar_number, use_radar_rf, use_radar_rv, datathin_radar, hroi_radar, vroi_radar
    namelist /airborne_radar / use_airborne_rf, use_airborne_rv, datathin_airborne, hroi_airborne, vroi_airborne
+   namelist /co2_tower_obs  / use_co2_tower, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower
 
 
 end module namelist_define
