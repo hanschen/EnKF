@@ -27,6 +27,8 @@
   use map_utils
   use wrf_tools
   use radar
+  implicit none
+
   integer            :: i_unit=80010, o_unit=90010
   integer            :: unit
   integer            :: ie, ic, it, ix, jx, kx, i, j, k, n, ntot, ni,nj,nk
