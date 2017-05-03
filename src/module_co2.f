@@ -61,7 +61,7 @@ contains
     subroutine get_co2_tower_obs(times, ix, jx, kx, p, ph, proj)
         implicit none
 
-        character (len=80), intent(in)              :: times
+        character(len=80), intent(in)               :: times
         integer, intent(in)                         :: ix, jx, kx
         real, dimension(ix, jx, kx), intent(in)     :: p
         real, dimension(ix, jx, kx+1), intent(in)   :: ph
