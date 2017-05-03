@@ -146,6 +146,12 @@ subroutine  read_namelist(ix, jx, kx)
    hroi_airborne     = 999
    vroi_airborne     = 999
    
+!-- use_co2_tower
+   use_co2_tower      = .false. 
+   datathin_co2_tower = 999
+   hroi_co2_tower     = 999
+   vroi_co2_tower     = 999
+   
 !------------------------------------------------------------------------
 !  [2.0] read namelist 
 !------------------------------------------------------------------------
@@ -240,6 +246,11 @@ subroutine  read_namelist(ix, jx, kx)
    if( iost .ne. 0 ) then
        write(*,*)'airborne_radar, please check it.'
        stop 'read_namelist airborne_radar'
+   endif
+   read ( unit = namelist_unit, nml = co2_tower_obs, iostat = iost )
+   if( iost .ne. 0 ) then
+       write(*,*)'co2_tower_obs, please check it.'
+       stop 'read_namelist co2_tower_obs'
    endif
 
    if( update_is <= 1 .or. update_is >=ix ) update_is = 1
@@ -358,6 +369,12 @@ subroutine  read_namelist(ix, jx, kx)
          if ( use_airborne_rv ) write(*,'(a)') ' ===== assimilate airborne radar radial velocity ===== '
          write(6,'(a,i4   )') '       data thinning: ',datathin_airborne
          write(6,'(a,2i4  )') '       ROI for horizonal and vertical is:', hroi_airborne, vroi_airborne
+      endif
+
+      if ( use_co2_tower ) then
+         write(6,'(a      )') ' ===== assimilate TOWER CO2 CONCENTRATION ===== '
+         write(6,'(a,i4   )') '       data thinning: ',datathin_co2_tower
+         write(6,'(a,2i4  )') '       ROI for horizonal and vertical is:', hroi_co2_tower, vroi_co2_tower
       endif
 
    endif
