@@ -72,6 +72,10 @@ contains
 
         character (len=80)                          :: tower_name
         real                                        :: lat, lon, elev, co2
+        integer                                     :: iwrf, jwrf, kwrf
+
+        real                                        :: aio, ajo
+        integer                                     :: io, jo, ko
 
         input_file = 'tower_' // times(1:4) // times(6:7) // times(9:10) // &
                      times(12:13) // times(15:16) // times(18:19) // ".dat"
@@ -115,6 +119,26 @@ contains
             raw%co2_tower%longitude(i) = lon
             raw%co2_tower%elevation(i) = elev
             raw%co2_tower%co2(i) = co2
+
+            iwrf = iwrf + 1
+            jwrf = jwrf + 1
+            kwrf = kwrf + 1
+
+            call latlon_to_ij(proj, lat, lon, aio, ajo)
+            io = nint(aio)
+            jo = nint(ajo)
+            ko = height_to_k(ph(io,jo,:), elev)
+
+            ! Diagnostics
+            ! write(*, *) trim(tower_name)
+            ! write(*, *) io, iwrf
+            ! write(*, *) jo, jwrf
+            ! write(*, *) ko, kwrf
+            ! write(*, *) lat
+            ! write(*, *) lon
+            ! write(*, *) elev
+            ! write(*, *) co2
+
         end do
         close(10)
 
