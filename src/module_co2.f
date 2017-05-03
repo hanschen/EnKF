@@ -16,6 +16,40 @@ module co2
 
 contains
     !--------------------------------------------------------------------------
+    ! height_to_k
+    !
+    ! Index of closest model level corresponding to height.
+    !
+    !--------------------------------------------------------------------------
+    function height_to_k(ph, height)
+        implicit none
+
+        integer                                     :: height_to_k
+        real, dimension(:), intent(in)              :: ph
+        real, intent(in)                            :: height
+
+        integer                                     :: k, kx
+        real                                        :: ph_unstaggered
+        real                                        :: diff, min_diff
+
+        kx = size(ph)
+        min_diff = 9999
+        height_to_k = -1
+
+        do k = 1, kx-1
+            ph_unstaggered = (ph(k) + ph(k+1))/2.
+            diff = abs(height - ph_unstaggered)
+            if (diff < min_diff) then
+                min_diff = diff
+                height_to_k = k
+            end if
+        end do
+
+        return
+
+    end function height_to_k
+
+    !--------------------------------------------------------------------------
     ! get_co2_tower_obs
     !
     ! Read CO2 tower files for the current time into raw%co2_tower variables.
