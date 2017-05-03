@@ -11,6 +11,7 @@ use map_utils
 use netcdf
 use wrf_tools
 use radar
+use co2
 implicit none
 
 type(proj_info)                      :: proj
@@ -82,6 +83,11 @@ if ( use_airborne_rv ) then
   if ( .not. use_ideal_obs  ) call get_airborne ( ix, jx, kx, proj, times )
 endif
 
+! CO2 tower data
+if ( use_co2_tower ) then
+    call get_co2_tower_obs ( times, ix, jx, kx, p, ph, proj )
+endif
+
 !  if ( use_radar_rv ) call output_simulated_rv ( "asimulated_rv" )
 !   if ( use_simulated ) call simulated_obser ( wrf_file, ix, jx, kx, proj )
 ! Add all obs type observations into obs%dat(num_rv)
@@ -131,6 +137,9 @@ if ( use_airborne_rv) iobs = iobs + raw%airborne%num
 
 !. calculate tracker records
 if ( use_hurricane_PI ) iobs = iobs + 3            ! for hurricane center lat and lon and slp
+
+!. calculate CO2 tower records
+if ( use_co2_tower ) iobs = iobs + raw%co2_tower%num
 
 if(my_proc_id==0) write(*,*)iobs,' observation data will be loaded'
 
@@ -252,6 +261,13 @@ obs%num = 0               ! obs%num for all observation, not only Rv
          endif
       endif
    endif
+
+!....... CO2 concentration from towers
+! TODO
+!   if ( use_co2_tower ) then
+!         call sort_co2_tower_data( wrf_file, ix, jx, kx, proj, 'tower   ', &
+!              datathin_co2_tower  , hroi_co2_tower  , vroi_co2_tower  , grid_id )
+!   endif
 
    if(my_proc_id==0) write(*,*)obs%num,' observation data will be assimilated'
 
