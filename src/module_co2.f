@@ -108,8 +108,8 @@ contains
 
         rewind(10)
         do i = 1, raw%co2_tower%num
-            read(10, '(a12, 4f12.3)', iostat=ierr) tower_name, lat, lon, &
-                                                   elev, co2
+            read(10, '(a5, f10.4, f10.4, f7.1, i4, i4, i3, f9.4)', &
+                 iostat=ierr) tower_name, lat, lon, elev, jwrf, iwrf, kwrf, co2
 
             raw%co2_tower%latitude(i) = lat
             raw%co2_tower%longitude(i) = lon
