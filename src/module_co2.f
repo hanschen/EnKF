@@ -65,15 +65,15 @@ contains
             end if
             nlines = nlines + 1
         end do
+        raw%co2_tower%num = nlines
 
-        allocate(raw%co2_tower%latitude(nlines))
-        allocate(raw%co2_tower%longitude(nlines))
-        allocate(raw%co2_tower%elevation(nlines))
-        allocate(raw%co2_tower%co2(nlines))
+        allocate(raw%co2_tower%latitude(raw%co2_tower%num))
+        allocate(raw%co2_tower%longitude(raw%co2_tower%num))
+        allocate(raw%co2_tower%elevation(raw%co2_tower%num))
+        allocate(raw%co2_tower%co2(raw%co2_tower%num))
 
         rewind(10)
-        raw%co2_tower%num = nlines
-        do i = 1, nlines
+        do i = 1, raw%co2_tower%num
             read(10, '(a12, 4f12.3)', iostat=ierr) tower_name, lat, lon, &
                                                    elev, co2
 
