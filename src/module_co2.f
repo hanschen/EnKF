@@ -47,7 +47,9 @@ contains
              iostat=ierr)
         if (ierr /= 0) then
             if (my_proc_id == 0) then
-                write(*, *) trim(input_file), ' does not exsit.'
+                write(*, *) trim(input_file), ' does not exist.'
+                write(*, *) 'Tower CO2 concentration data will not be &
+                            &assimilated!'
             end if
         end if
 
