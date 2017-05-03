@@ -88,6 +88,8 @@ contains
         end do
         close(10)
 
+        return
+
     end subroutine get_co2_tower_obs
 
 end module co2
