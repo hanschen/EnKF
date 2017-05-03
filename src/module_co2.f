@@ -81,10 +81,6 @@ contains
             raw%co2_tower%longitude(i) = lon
             raw%co2_tower%elevation(i) = elev
             raw%co2_tower%co2(i) = co2
-
-            if (ierr /= 0) then
-                exit
-            end if
         end do
         close(10)
 
