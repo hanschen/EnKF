@@ -58,13 +58,11 @@ contains
     !   tower_%Y%m%d%H%M%S.dat (e.g. tower_20170503103800.dat)
     !
     !--------------------------------------------------------------------------
-    subroutine get_co2_tower_obs(times, ix, jx, kx, p, ph, proj)
+    subroutine get_co2_tower_obs(times, ph, proj)
         implicit none
 
         character(len=80), intent(in)               :: times
-        integer, intent(in)                         :: ix, jx, kx
-        real, dimension(ix, jx, kx), intent(in)     :: p
-        real, dimension(ix, jx, kx+1), intent(in)   :: ph
+        real, dimension(:,:,:), intent(in)          :: ph
         type(proj_info), intent(in)                 :: proj
 
         integer                                     :: i

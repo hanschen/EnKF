@@ -85,7 +85,7 @@ endif
 
 ! CO2 tower data
 if ( use_co2_tower ) then
-    call get_co2_tower_obs ( times, ix, jx, kx, p, ph, proj )
+    call get_co2_tower_obs ( times, ph, proj )
 endif
 
 !  if ( use_radar_rv ) call output_simulated_rv ( "asimulated_rv" )
