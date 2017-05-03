@@ -18,6 +18,8 @@ module_wrf_tools.o:
 	$(FC) -c $(FCFLAG) -FR module_wrf_tools.f
 module_radar.o:
 	$(FC) -c $(FCFLAG) -FR module_radar.f
+module_co2.o:
+	$(FC) -c $(FCFLAG) -FR module_co2.f
 cal_roi.o:
 	$(FC) -c $(FCFLAG) -FR cal_roi.f
 hurricane_center.o:
@@ -37,8 +39,8 @@ ensemble_mean.o:
 replace_mean.o:
 	$(FC) -c $(FCFLAG) -FR replace_mean.f
 
-enkf.mpi: module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o enkf.o
-	$(FC) -o enkf.mpi $(FCFLAG) -FR -I$(NETCDF)/include  module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o enkf.o -L$(NETCDF)/lib -lnetcdf -lnetcdff main.f
+enkf.mpi: module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o module_co2.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o enkf.o
+	$(FC) -o enkf.mpi $(FCFLAG) -FR -I$(NETCDF)/include  module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o module_co2.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o enkf.o -L$(NETCDF)/lib -lnetcdf -lnetcdff main.f
 
 replace_perturbationmean_by_initial.exe: module_netcdf.o
 	$(FC) -o replace_perturbationmean_by_initial.exe $(FCFLAG) -FR -I$(NETCDF)/include module_netcdf.o -L$(NETCDF)/lib -lnetcdf -lnetcdff replace_perturbationmean_by_initial.f
@@ -55,11 +57,11 @@ replace_xfmean_with_gfs.exe: module_structure.o module_netcdf.o module_wrf_tools
 enkf_gfs_hybrid_inflation.exe: module_structure.o module_netcdf.o module_wrf_tools.o module_map_utils.o
 	$(FC) -o enkf_gfs_hybrid_inflation.exe $(FCFLAG) -FR -I$(NETCDF)/include module_structure.o module_netcdf.o module_wrf_tools.o module_map_utils.o -L$(NETCDF)/lib -lnetcdf -lnetcdff enkf_gfs_hybrid_inflation.f
 
-soairborne_to_3dvar.exe: module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o
-	$(FC) -o soairborne_to_3dvar.exe $(FCFLAG) -FR -I$(NETCDF)/include module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o -L$(NETCDF)/lib -lnetcdf -lnetcdff soairborne_to_3dvar.f
+soairborne_to_3dvar.exe: module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o module_co2.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o
+	$(FC) -o soairborne_to_3dvar.exe $(FCFLAG) -FR -I$(NETCDF)/include module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o module_co2.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o -L$(NETCDF)/lib -lnetcdf -lnetcdff soairborne_to_3dvar.f
 
-so_to_3dvar.exe: module_structure.o mpi_module.o module_netcdf.o module_wrf_tools.o module_map_utils.o module_radar.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o
-	$(FC) -o so_to_3dvar.exe $(FCFLAG) -FR -I$(NETCDF)/include module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o -L$(NETCDF)/lib -lnetcdf -lnetcdff so_to_3dvar.f
+so_to_3dvar.exe: module_structure.o mpi_module.o module_netcdf.o module_wrf_tools.o module_map_utils.o module_radar.o module_co2.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o
+	$(FC) -o so_to_3dvar.exe $(FCFLAG) -FR -I$(NETCDF)/include module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o module_radar.o module_co2.o cal_roi.o hurricane_center.o obs_io.o xb.o sub_enkf_util.o -L$(NETCDF)/lib -lnetcdf -lnetcdff so_to_3dvar.f
 
 ensemble_mean.exe: module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o sub_enkf_util.o
 	$(FC) -o ensemble_mean.exe $(FCFLAG) -FR -I$(NETCDF)/include module_structure.o mpi_module.o module_netcdf.o module_map_utils.o module_wrf_tools.o sub_enkf_util.o -L$(NETCDF)/lib -lnetcdf -lnetcdff ensemble_mean.f
