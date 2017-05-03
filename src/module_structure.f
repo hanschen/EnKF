@@ -289,11 +289,18 @@ module obs_define
         real, allocatable,dimension(:,:,:)         :: pres, spd, wd, height, t, td, rh !(:,:,3), 3: data, qc, error
    end type gts_data_type
 
+   type co2_tower_type
+        integer                                    :: num
+        real, allocatable,dimension(:)             :: latitude, longitude, elevation
+        real, allocatable,dimension(:)             :: co2
+   end type co2_tower_type
+
    type raw_type
         integer                                  :: radar_stn_num
         type ( Radar_data_type ), allocatable,dimension( : )  :: radar
         type ( airborne_data_type  )             :: airborne
         type ( gts_data_type      )              :: gts
+        type ( co2_tower_type     )              :: co2_tower
    end type raw_type
 
    type obs_type
