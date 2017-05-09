@@ -109,6 +109,9 @@ contains
         allocate(raw%co2_tower%longitude(raw%co2_tower%num))
         allocate(raw%co2_tower%elevation(raw%co2_tower%num))
         allocate(raw%co2_tower%co2(raw%co2_tower%num))
+        allocate(raw%co2_tower%ii(raw%co2_tower%num))
+        allocate(raw%co2_tower%jj(raw%co2_tower%num))
+        allocate(raw%co2_tower%kk(raw%co2_tower%num))
 
         rewind(10)
         do i = 1, raw%co2_tower%num
@@ -128,6 +131,10 @@ contains
             io = nint(aio)
             jo = nint(ajo)
             ko = height_to_k(ph(io,jo,:), elev)
+
+            raw%co2_tower%ii(i) = aio
+            raw%co2_tower%jj(i) = ajo
+            raw%co2_tower%kk(i) = ko
 
             ! Diagnostics
             ! write(*, *) trim(tower_name)

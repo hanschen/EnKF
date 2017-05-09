@@ -292,6 +292,7 @@ module obs_define
    type co2_tower_type
         integer                                    :: num
         real, allocatable,dimension(:)             :: latitude, longitude, elevation
+        real, allocatable,dimension(:)             :: ii, jj, kk
         real, allocatable,dimension(:)             :: co2
    end type co2_tower_type
 
