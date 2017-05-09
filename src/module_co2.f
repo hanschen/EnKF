@@ -153,4 +153,50 @@ contains
 
     end subroutine get_co2_tower_obs
 
+    !--------------------------------------------------------------------------
+    ! sort_co2_tower_data
+    !
+    ! Prepare CO2 tower data to be assimilated.
+    !
+    !--------------------------------------------------------------------------
+    subroutine sort_co2_tower_data(wrf_file, ix, jx, kx, proj, instrument, &
+                                   datathin, hroi, vroi, grid_id )
+        implicit none
+
+        real, parameter                      :: CO2_ERROR = 1
+        character(len=10), intent(in)        :: wrf_file
+        integer, intent(in)                  :: ix, jx, kx
+        type(proj_info), intent(in)          :: proj
+        character(len=8), intent(in)         :: instrument
+        integer, intent(in)                  :: datathin, hroi, vroi, grid_id
+
+        integer                              :: n
+        real                                 :: x, y
+
+        do n = 1, raw%co2_tower%num
+            if (raw%co2_tower%co2(n) > 0) then
+                ! call latlon_to_ij(proj, raw%co2_tower%latitude(n),&
+                                  ! raw%co2_tower%longitude(n), x, y)
+                ! k = height_to_k(ph(x,y,:), raw%co2_tower%elevation(n))
+
+                obs%num                 = obs%num + 1
+                obs%dat     (obs%num  ) = raw%co2_tower%co2(n)
+                obs%type    (obs%num  ) = 'co2tower  '
+                obs%err     (obs%num  ) = CO2_ERROR
+                obs%position(obs%num,1) = x
+                obs%position(obs%num,2) = y
+                obs%position(obs%num,3) = raw%co2_tower%elevation(n) / 1000.
+                ! obs%sta     (obs%num,1) = x
+                ! obs%sta     (obs%num,2) = j
+                ! obs%sta     (obs%num,3) = k
+                ! obs%sta     (obs%num,4) = raw%co2_tower%elevation(n) / 1000.
+                obs%roi     (obs%num,1) = hroi
+                obs%roi     (obs%num,2) = vroi
+            endif
+        end do
+
+        return
+
+    end subroutine sort_co2_tower_data
+
 end module co2
