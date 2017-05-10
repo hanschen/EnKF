@@ -24,26 +24,40 @@ contains
     function height_to_k(ph, height)
         implicit none
 
-        integer                                     :: height_to_k
-        real, dimension(:), intent(in)              :: ph
-        real, intent(in)                            :: height
+        real                                :: height_to_k
+        real, dimension(:), intent(in)      :: ph
+        real, intent(in)                    :: height
 
-        integer                                     :: k, kx
-        real                                        :: ph_unstaggered
-        real                                        :: diff, min_diff
+        integer                             :: k, kx, k1
+        real, dimension(:), allocatable     :: ph_unstaggered
+        real                                :: height_lower, height_upper
+        real                                :: alpha
 
         kx = size(ph)
-        min_diff = 9999
-        height_to_k = -1
+        allocate(ph_unstaggered(kx-1))
 
+        ph_unstaggered = (ph(1:kx-1) + ph(2:kx)) / 2.
+
+        ! Find closest vertical level below 'height'
         do k = 1, kx-1
-            ph_unstaggered = (ph(k) + ph(k+1))/2.
-            diff = abs(height - ph_unstaggered)
-            if (diff < min_diff) then
-                min_diff = diff
-                height_to_k = k
+            if (ph_unstaggered(k) < height) then
+                k1 = k
             end if
         end do
+
+        ! Linearly interpolate to find k at 'height'
+        height_lower = ph_unstaggered(k1)
+        height_upper = ph_unstaggered(k1+1)
+
+        alpha = (height - height_lower)/(height_upper - height_lower)
+        height_to_k = k1 + alpha
+
+        if (height_to_k < 1) then
+            ! TODO: Raise a warning
+            height_to_k = 1
+        end if
+
+        ! write(*, *) height, height_lower, height_upper, k1, height_to_k
 
         return
 
