@@ -257,7 +257,7 @@ do iob=1,obs%num
          call xb_to_rv(filename,proj,tmp,ix,jx,kx,nv,iob,xlong,znw,xb,0) 
       else if ( obstype(1:1) == 'P' .or. obstype(1:1) == 'H'  ) then
          call xb_to_sounding(filename,proj,tmp,ix,jx,kx,nv,iob,xlong,znu,znw,p_top,xb,1,0)
-      else if ( obstype(1:5) == 'ideal' ) then
+      else if ( obstype(1:5) == 'ideal'  .or. trim(obstype) == 'co2tower' )then
          obs%position(iob,3)=obs%position(iob,3)
       else 
          obs%position(iob,3) = 1.
