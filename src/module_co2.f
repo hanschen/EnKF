@@ -205,10 +205,8 @@ contains
             if ((ii < 1. .or. ii > real(ix)) .or. &
                     (jj < 1. .or. jj > real(jx))) then
                 if (my_proc_id == 0) then
-                    write(*, *) 'Tower at ', raw%co2_tower%latitude(n), &
-                                ' latitude and ', raw%co2_tower%longitude(n), &
-                                ' longitude is outside the domain, skipping', &
-                                ' observation'
+                    write(*, *) 'Tower ', trim(raw%co2_tower%tower_name(n)), &
+                                ' is outside the domain, skipping observation'
                 end if
 
                 cycle
@@ -217,10 +215,9 @@ contains
             ! Check if the vertical position of the observation is reasonable
             if (kk == 0) then
                 if (my_proc_id == 0) then
-                    write(*, *) 'Tower at ', raw%co2_tower%latitude(n), &
-                                ' latitude and ', raw%co2_tower%longitude(n), &
-                                ' longitude is above the highest model ', &
-                                ' level (how is that even possible?), ', &
+                    write(*, *) 'Tower ', trim(raw%co2_tower%tower_name(n)), &
+                                ' is above the highest model level', &
+                                ' (how is that even possible?), ', &
                                 ' skipping observation'
                 end if
 
@@ -230,11 +227,10 @@ contains
                     kk = 1
                 else
                     if (my_proc_id == 0) then
-                        write(*, *) 'Tower at ', raw%co2_tower%latitude(n), &
-                                    ' latitude and ', &
-                                    raw%co2_tower%longitude(n), &
-                                    ' longitude is too below the lowest ', &
-                                    ' model level, skipping observation'
+                        write(*, *) 'Tower ', &
+                                    trim(raw%co2_tower%tower_name(n)), &
+                                    ' is too far below the lowest model ', &
+                                    ' level, skipping observation'
                     end if
 
                     cycle
