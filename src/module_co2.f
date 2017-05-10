@@ -20,6 +20,24 @@ contains
     !
     ! Index of closest model level corresponding to height.
     !
+    ! Parameters
+    ! ----------
+    ! ph:
+    !   Array with model geopotential heights (staggered) with the same units
+    !   as ``height``.
+    ! height:
+    !   Desired height.
+    !
+    ! Return
+    ! ------
+    ! height_to_k:
+    !   k at height.
+    !
+    !   Special return values:
+    !   - Negative number: k is below the lowest model level (number indicates
+    !     the height difference in the units of ``height``).
+    !   - 0: k is above the highest model level.
+    !
     !--------------------------------------------------------------------------
     function height_to_k(ph, height)
         implicit none
@@ -68,9 +86,19 @@ contains
     ! get_co2_tower_obs
     !
     ! Read CO2 tower files for the current time into raw%co2_tower variables.
+    !
+    ! Parameters
+    ! ----------
+    ! times:
+    !   Time of the observation formatted as %Y%m%d%H%M%S, e.g. 20170503103800.
+    ! ph:
+    !   Unstaggered model geopotential heights.
+    ! proj:
+    !   Model projection (of type proj_info).
     ! 
-    ! Input files:
-    !   tower_%Y%m%d%H%M%S.dat (e.g. tower_20170503103800.dat)
+    ! Input files
+    ! -----------
+    ! tower_%Y%m%d%H%M%S.dat (e.g. tower_20170503103800.dat)
     !
     !--------------------------------------------------------------------------
     subroutine get_co2_tower_obs(times, ph, proj)
@@ -184,6 +212,20 @@ contains
     !
     ! Prepare CO2 tower data to be assimilated.
     !
+    ! Parameters
+    ! ----------
+    ! ix:
+    !   x (longitude) dimension size.
+    ! jx:
+    !   y (latitude) dimension size.
+    ! datathin:
+    !   Ignore every ``datathin``th tower (NOT IMPLEMENTED).
+    !   For example, if ``datathin`` is 2, then every second tower is ignored.
+    ! hroi:
+    !   Horizontal radius of influence in gridpoints.
+    ! vroi:
+    !   Vertical radius of influence in gridpoints.
+    !
     !--------------------------------------------------------------------------
     subroutine sort_co2_tower_data(ix, jx, datathin, hroi, vroi)
         implicit none
@@ -262,6 +304,29 @@ contains
     !
     ! The tower value is obtained through linear interpolation horizontally and
     ! vertically.
+    !
+    ! Parameters
+    ! ----------
+    ! inputfile:
+    !   Path to wrfout file with the background. Used only if 'CO2' is not
+    !   a state variable.
+    ! xb:
+    !   State vector (background or prior).
+    ! ix:
+    !   x (longitude) dimension size.
+    ! jx:
+    !   y (latitude) dimension size.
+    ! kx:
+    !   z (vertical) dimension size.
+    ! nv:
+    !   Number of state variables.
+    ! iob:
+    !   Number of the current observation.
+    !
+    ! Returns
+    ! -------
+    ! hxb:
+    !   h(xb) for the current observation.
     !
     !--------------------------------------------------------------------------
     subroutine xb_to_co2_tower(inputfile, xb, ix, jx, kx, nv, iob, hxb)
