@@ -269,7 +269,7 @@ contains
         character(len=10), intent(in)           :: inputfile
         character(len=10)                       :: obstype
         integer, intent(in)                     :: ix, jx, kx, nv, iob
-        real, dimension(3,3,kx+1,nv), intent(in) :: xa  ! 1st guest
+        real, dimension(3,3,kx+1,nv), intent(in) :: xa
         real, intent(out)                       :: xb
 
         real, dimension(ix,jx,kx)               :: co2
