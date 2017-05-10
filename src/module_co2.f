@@ -120,6 +120,7 @@ contains
         end do
         raw%co2_tower%num = nlines
 
+        allocate(raw%co2_tower%tower_name(raw%co2_tower%num))
         allocate(raw%co2_tower%latitude(raw%co2_tower%num))
         allocate(raw%co2_tower%longitude(raw%co2_tower%num))
         allocate(raw%co2_tower%elevation(raw%co2_tower%num))
@@ -133,6 +134,7 @@ contains
             read(10, '(a5, f10.4, f10.4, f7.1, i4, i4, i3, f9.4)', &
                  iostat=ierr) tower_name, lat, lon, elev, jwrf, iwrf, kwrf, co2
 
+            raw%co2_tower%tower_name(n) = tower_name
             raw%co2_tower%latitude(n) = lat
             raw%co2_tower%longitude(n) = lon
             raw%co2_tower%elevation(n) = elev
