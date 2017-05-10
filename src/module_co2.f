@@ -88,7 +88,7 @@ contains
         real                                        :: lat, lon, elev, co2
         integer                                     :: iwrf, jwrf, kwrf
 
-        real                                        :: aio, ajo
+        real                                        :: aio, ajo, ako
         integer                                     :: io, jo, ko
 
         input_file = 'tower_' // times(1:4) // times(6:7) // times(9:10) // &
@@ -145,7 +145,9 @@ contains
             call latlon_to_ij(proj, lat, lon, aio, ajo)
             io = nint(aio)
             jo = nint(ajo)
-            ko = height_to_k(ph(io,jo,:), elev)
+
+            ako = height_to_k(ph(io,jo,:), elev)
+            ko = nint(ako)
 
             raw%co2_tower%ii(n) = aio
             raw%co2_tower%jj(n) = ajo
