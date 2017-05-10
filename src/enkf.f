@@ -371,7 +371,8 @@ obs_assimilate_cycle : do it = 1,obs%num
       'No.',iob,' '//obstype//' =',y(iob), ' ya=', ya(iob,numbers_en+1), ' y-ya=', y_hxm, &
       ' err=',error,'hroi=',obs%roi(iob,1),'vroi=',obs%roi(iob,2),obs%position(iob,1:3)
    if( abs(y_hxm)>(error*5.) .and. &
-       .not.(obstype=='min_slp   ' .or. obstype=='longtitude' .or. obstype=='latitude  ') ) then
+       .not.(obstype=='min_slp   ' .or. obstype=='longtitude' .or. obstype=='latitude  ') .and. &
+       (trim(obstype) /= 'co2tower') ) then
       if ( my_proc_id==0 ) write(*,*)' ...kicked off for large error'
       kick_flag(iob)=1
       cycle obs_assimilate_cycle
