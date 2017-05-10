@@ -189,16 +189,32 @@ contains
         integer, intent(in)                  :: ix, jx
         integer, intent(in)                  :: datathin, hroi, vroi
 
+        real                                 :: ii, jj
         integer                              :: n
 
         do n = 1, raw%co2_tower%num
+            ii = raw%co2_tower%ii(n)
+            jj = raw%co2_tower%jj(n)
+
+            if ((ii < 1. .or. ii > real(ix)) .or. &
+                    (jj < 1. .or. jj > real(jx))) then
+                if (my_proc_id == 0) then
+                    write(*, *) 'Tower at ', raw%co2_tower%latitude(n), &
+                                ' latitude and ', raw%co2_tower%longitude(n), &
+                                ' longitude is outside the domain, skipping', &
+                                ' observation'
+                end if
+
+                cycle
+            end if
+
             if (raw%co2_tower%co2(n) > 0) then
                 obs%num                 = obs%num + 1
                 obs%dat     (obs%num  ) = raw%co2_tower%co2(n)
                 obs%type    (obs%num  ) = 'co2tower  '
                 obs%err     (obs%num  ) = CO2_ERROR
-                obs%position(obs%num,1) = raw%co2_tower%ii(n)
-                obs%position(obs%num,2) = raw%co2_tower%jj(n)
+                obs%position(obs%num,1) = ii
+                obs%position(obs%num,2) = jj
                 obs%position(obs%num,3) = raw%co2_tower%kk(n)
                 obs%roi     (obs%num,1) = hroi
                 obs%roi     (obs%num,2) = vroi
