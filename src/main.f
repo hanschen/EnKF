@@ -130,7 +130,7 @@ if(gid==0) &
   call output(i_unit+numbers_en+1,ix,jx,kx,ni,nj,nk,nv,nm,s_comm,sid,iid,jid,xm,times)
 
 time1 = MPI_Wtime()
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' Data Processing tooks ', time1-time_start, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' Data Processing took ', time1-time_start, ' seconds.'
 
 allocate(ind(obs%num))
 if(my_proc_id==0) then
@@ -150,7 +150,7 @@ call MPI_Bcast(ind,obs%num,MPI_INTEGER,0,comm,ierr)
 write(wrf_file,'(a5,i5.5)')'fort.',i_unit+1
 call enkf(wrf_file,ix,jx,kx,ni,nj,nk,nv,nm,g_comm,s_comm,gid,sid,iid,jid,xm,x,ind,proj,times)
 time2 = MPI_Wtime()
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' EnKF tooks ', time2-time1, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' EnKF took ', time2-time1, ' seconds.'
      
 ! Save the Analyses
 if ( my_proc_id == 0 ) write(*,*)'Output members and mean now...'
@@ -179,8 +179,8 @@ deallocate(xm)
 call MPI_Comm_free(g_comm,ierr)
 call MPI_Comm_free(s_comm,ierr)
 call parallel_finish()
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' Output tooks ', time_end-time2, ' seconds.'
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' All tooks ', time_end-time_start, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' Output took ', time_end-time2, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' All took ', time_end-time_start, ' seconds.'
 if ( my_proc_id == 0 ) write(*,'(a)')' Successful completion of EnKF.'
 
 end program EnKF_WRF

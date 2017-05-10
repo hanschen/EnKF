@@ -330,7 +330,7 @@ write(format1,'(a,i4,a)') '(i5,a,',numbers_en+1,'f10.2)'
 do iob=1,obs%num
   if(print_detail>100 .and. my_proc_id==0) write(*,format1) iob, ' '//obs%type(iob)//' ya=',ya(iob,:)
 enddo
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' Calculation of y=Hx tooks ', MPI_Wtime()-timer, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' Calculation of y=Hx took ', MPI_Wtime()-timer, ' seconds.'
 
 !----------------------------------------------------------------------------------------
 ! II. Calculate the perturbations and add the inflation
@@ -735,12 +735,12 @@ enddo update_x_var
 
 end do obs_assimilate_cycle
 
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 1 tooks ', t1, ' seconds.'
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 2 tooks ', t2, ' seconds.'
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 3 tooks ', t3, ' seconds.'
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 4 tooks ', t4, ' seconds.'
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 5 tooks ', t5, ' seconds.'
-if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' Assimilation tooks ', MPI_Wtime()-timer, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 1 took ', t1, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 2 took ', t2, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 3 took ', t3, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 4 took ', t4, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' 5 took ', t5, ' seconds.'
+if ( my_proc_id == 0 ) write(*,'(a,f7.2,a)')' Assimilation took ', MPI_Wtime()-timer, ' seconds.'
 
 !---------------------------------------------------------------------------------
 ! IV. Diagnostics for filter performance.
