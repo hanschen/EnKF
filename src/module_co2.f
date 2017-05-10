@@ -213,4 +213,69 @@ contains
 
     end subroutine sort_co2_tower_data
 
+    !--------------------------------------------------------------------------
+    ! xb_to_co2tower
+    !
+    ! Translate background state vector to CO2 concentration value at tower
+    ! locations.
+    !
+    ! The tower value is obtained through linear interpolation horizontally and
+    ! vertically.
+    !
+    !--------------------------------------------------------------------------
+    subroutine xb_to_co2tower(inputfile, xa, ix, jx, kx, nv, iob, xb)
+        implicit none
+        character(len=10), intent(in)           :: inputfile
+        character(len=10)                       :: obstype
+        integer, intent(in)                     :: ix, jx, kx, nv, iob
+        real, dimension(3,3,kx+1,nv), intent(in) :: xa  ! 1st guest
+        real, intent(out)                       :: xb
+
+        real, dimension(ix,jx,kx)               :: co2
+        real, dimension(kx)                     :: co2_vert
+        integer                                 :: m
+        integer                                 :: i_co2 = 0
+        integer                                 :: obs_ii, obs_jj, obs_kk
+        integer                                 :: i1, j1, k1
+        real                                    :: dx, dxm, dy, dym, dz, dzm
+
+        obstype = obs%type(iob)
+        obs_ii = obs%position(iob,1)
+        obs_jj = obs%position(iob,2)
+        obs_kk = obs%position(iob,3)
+
+        write(*,*) obs_ii, obs_jj, obs_kk
+
+        i1 = int(obs_ii)
+        j1 = int(obs_jj)
+        k1 = int(obs_kk)
+
+        dx = obs_ii - real(i1)
+        dy = obs_jj - real(j1)
+        dz = obs_kk - real(k1)
+        dxm = real(i1+1) - obs_ii
+        dym = real(j1+1) - obs_jj
+        dzm = real(k1+1) - obs_kk
+
+        do m = 1, nv
+            if (trim(enkfvar(m)) == 'CO2') then
+                i_co2 = m
+            end if
+        end do
+
+        if (i_co2 > 0) then
+            co2(i1:i1+1,j1:j1+1,1:kx) = xa(1:2,1:2,1:kx,i_co2)
+        else
+            call get_variable3d(inputfile, 'CO2', ix, jx, kx, 1, co2)
+        end if
+
+       co2_vert(:) = dym*(dx*co2(i1+1,j1,:) + dxm*co2(i1,j1,:)) + &
+                     dy*(dx*co2(i1+1,j1+1,:) + dxm*co2(i1,j1+1,:))
+
+        xb = dzm*co2_vert(k1) + dz*co2_vert(k1+1)
+
+        return
+
+    end subroutine xb_to_co2tower
+
 end module co2
