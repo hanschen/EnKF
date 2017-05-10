@@ -123,6 +123,7 @@ contains
             raw%co2_tower%elevation(n) = elev
             raw%co2_tower%co2(n) = co2
 
+            ! Convert from 0-based indexing to 1-based indexing
             iwrf = iwrf + 1
             jwrf = jwrf + 1
             kwrf = kwrf + 1
