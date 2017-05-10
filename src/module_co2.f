@@ -196,6 +196,7 @@ contains
             ii = raw%co2_tower%ii(n)
             jj = raw%co2_tower%jj(n)
 
+            ! Check if the observation is within the domain
             if ((ii < 1. .or. ii > real(ix)) .or. &
                     (jj < 1. .or. jj > real(jx))) then
                 if (my_proc_id == 0) then
