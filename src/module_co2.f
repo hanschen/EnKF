@@ -49,12 +49,13 @@ contains
         height_lower = ph_unstaggered(k1)
         height_upper = ph_unstaggered(k1+1)
 
-        alpha = (height - height_lower)/(height_upper - height_lower)
-        height_to_k = k1 + alpha
-
-        if (height_to_k < 1) then
-            ! TODO: Raise a warning
-            height_to_k = 1
+        if (height < height_lower) then
+            height_to_k = height - height_lower
+        else if (height > height_upper) then
+            height_to_k = height_upper - height
+        else
+            alpha = (height - height_lower)/(height_upper - height_lower)
+            height_to_k = k1 + alpha
         end if
 
         ! write(*, *) height, height_lower, height_upper, k1, height_to_k
