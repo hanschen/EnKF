@@ -264,13 +264,13 @@ contains
     ! vertically.
     !
     !--------------------------------------------------------------------------
-    subroutine xb_to_co2tower(inputfile, xa, ix, jx, kx, nv, iob, xb)
+    subroutine xb_to_co2tower(inputfile, xb, ix, jx, kx, nv, iob, hxb)
         implicit none
         character(len=10), intent(in)           :: inputfile
         character(len=10)                       :: obstype
         integer, intent(in)                     :: ix, jx, kx, nv, iob
-        real, dimension(3,3,kx+1,nv), intent(in) :: xa
-        real, intent(out)                       :: xb
+        real, dimension(3,3,kx+1,nv), intent(in) :: xb
+        real, intent(out)                       :: hxb
 
         real, dimension(ix,jx,kx)               :: co2
         real, dimension(kx)                     :: co2_vert
@@ -303,7 +303,7 @@ contains
         end do
 
         if (i_co2 > 0) then
-            co2(i1:i1+1,j1:j1+1,1:kx) = xa(1:2,1:2,1:kx,i_co2)
+            co2(i1:i1+1,j1:j1+1,1:kx) = xb(1:2,1:2,1:kx,i_co2)
         else
             call get_variable3d(inputfile, 'CO2', ix, jx, kx, 1, co2)
         end if
@@ -311,7 +311,7 @@ contains
        co2_vert(:) = dym*(dx*co2(i1+1,j1,:) + dxm*co2(i1,j1,:)) + &
                      dy*(dx*co2(i1+1,j1+1,:) + dxm*co2(i1,j1+1,:))
 
-        xb = dzm*co2_vert(k1) + dz*co2_vert(k1+1)
+        hxb = dzm*co2_vert(k1) + dz*co2_vert(k1+1)
 
         return
 
