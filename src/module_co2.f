@@ -65,7 +65,7 @@ contains
         real, dimension(:,:,:), intent(in)          :: ph
         type(proj_info), intent(in)                 :: proj
 
-        integer                                     :: i
+        integer                                     :: n
         character (len=80)                          :: input_file
         integer                                     :: ierr
         integer                                     :: nlines
@@ -114,14 +114,14 @@ contains
         allocate(raw%co2_tower%kk(raw%co2_tower%num))
 
         rewind(10)
-        do i = 1, raw%co2_tower%num
+        do n = 1, raw%co2_tower%num
             read(10, '(a5, f10.4, f10.4, f7.1, i4, i4, i3, f9.4)', &
                  iostat=ierr) tower_name, lat, lon, elev, jwrf, iwrf, kwrf, co2
 
-            raw%co2_tower%latitude(i) = lat
-            raw%co2_tower%longitude(i) = lon
-            raw%co2_tower%elevation(i) = elev
-            raw%co2_tower%co2(i) = co2
+            raw%co2_tower%latitude(n) = lat
+            raw%co2_tower%longitude(n) = lon
+            raw%co2_tower%elevation(n) = elev
+            raw%co2_tower%co2(n) = co2
 
             iwrf = iwrf + 1
             jwrf = jwrf + 1
@@ -132,9 +132,9 @@ contains
             jo = nint(ajo)
             ko = height_to_k(ph(io,jo,:), elev)
 
-            raw%co2_tower%ii(i) = aio
-            raw%co2_tower%jj(i) = ajo
-            raw%co2_tower%kk(i) = ko
+            raw%co2_tower%ii(n) = aio
+            raw%co2_tower%jj(n) = ajo
+            raw%co2_tower%kk(n) = ko
 
             ! Diagnostics
             ! write(*, *) trim(tower_name)
