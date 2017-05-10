@@ -285,8 +285,6 @@ contains
         obs_jj = obs%position(iob,2)
         obs_kk = obs%position(iob,3)
 
-        write(*,*) obs_ii, obs_jj, obs_kk
-
         i1 = int(obs_ii)
         j1 = int(obs_jj)
         k1 = int(obs_kk)
