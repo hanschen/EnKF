@@ -151,7 +151,7 @@ contains
 
             raw%co2_tower%ii(n) = aio
             raw%co2_tower%jj(n) = ajo
-            raw%co2_tower%kk(n) = ko
+            raw%co2_tower%kk(n) = ako
 
             ! Diagnostics
             ! write(*, *) trim(tower_name)
