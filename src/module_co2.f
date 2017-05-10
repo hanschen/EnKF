@@ -187,15 +187,17 @@ contains
         implicit none
 
         real, parameter                      :: CO2_ERROR = 1
+        real, parameter                      :: HEIGHT_TOLERENCE = 100
         integer, intent(in)                  :: ix, jx
         integer, intent(in)                  :: datathin, hroi, vroi
 
-        real                                 :: ii, jj
+        real                                 :: ii, jj, kk
         integer                              :: n
 
         do n = 1, raw%co2_tower%num
             ii = raw%co2_tower%ii(n)
             jj = raw%co2_tower%jj(n)
+            kk = raw%co2_tower%kk(n)
 
             ! Check if the observation is within the domain
             if ((ii < 1. .or. ii > real(ix)) .or. &
@@ -210,6 +212,33 @@ contains
                 cycle
             end if
 
+            ! Check if the vertical position of the observation is reasonable
+            if (kk == 0) then
+                if (my_proc_id == 0) then
+                    write(*, *) 'Tower at ', raw%co2_tower%latitude(n), &
+                                ' latitude and ', raw%co2_tower%longitude(n), &
+                                ' longitude is above the highest model ', &
+                                ' level (how is that even possible?), ', &
+                                ' skipping observation'
+                end if
+
+                cycle
+            else if (kk < 0) then
+                if (abs(kk) < HEIGHT_TOLERENCE) then
+                    kk = 1
+                else
+                    if (my_proc_id == 0) then
+                        write(*, *) 'Tower at ', raw%co2_tower%latitude(n), &
+                                    ' latitude and ', &
+                                    raw%co2_tower%longitude(n), &
+                                    ' longitude is too below the lowest ', &
+                                    ' model level, skipping observation'
+                    end if
+
+                    cycle
+                end if
+            end if
+
             if (raw%co2_tower%co2(n) > 0) then
                 obs%num                 = obs%num + 1
                 obs%dat     (obs%num  ) = raw%co2_tower%co2(n)
@@ -217,7 +246,7 @@ contains
                 obs%err     (obs%num  ) = CO2_ERROR
                 obs%position(obs%num,1) = ii
                 obs%position(obs%num,2) = jj
-                obs%position(obs%num,3) = raw%co2_tower%kk(n)
+                obs%position(obs%num,3) = kk
                 obs%roi     (obs%num,1) = hroi
                 obs%roi     (obs%num,2) = vroi
             endif
