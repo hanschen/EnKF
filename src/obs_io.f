@@ -264,8 +264,7 @@ obs%num = 0               ! obs%num for all observation, not only Rv
 
 !....... CO2 concentration from towers
    if ( use_co2_tower ) then
-      call sort_co2_tower_data( wrf_file, ix, jx, kx, proj, 'tower     ', &
-           datathin_co2_tower, hroi_co2_tower, vroi_co2_tower, grid_id )
+      call sort_co2_tower_data( ix, jx, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower )
    endif
 
    if(my_proc_id==0) write(*,*)obs%num,' observation data will be assimilated'

@@ -182,16 +182,12 @@ contains
     ! Prepare CO2 tower data to be assimilated.
     !
     !--------------------------------------------------------------------------
-    subroutine sort_co2_tower_data(wrf_file, ix, jx, kx, proj, instrument, &
-                                   datathin, hroi, vroi, grid_id )
+    subroutine sort_co2_tower_data(ix, jx, datathin, hroi, vroi)
         implicit none
 
         real, parameter                      :: CO2_ERROR = 1
-        character(len=10), intent(in)        :: wrf_file
-        integer, intent(in)                  :: ix, jx, kx
-        type(proj_info), intent(in)          :: proj
-        character(len=8), intent(in)         :: instrument
-        integer, intent(in)                  :: datathin, hroi, vroi, grid_id
+        integer, intent(in)                  :: ix, jx
+        integer, intent(in)                  :: datathin, hroi, vroi
 
         integer                              :: n
 
