@@ -255,7 +255,7 @@ contains
     end subroutine sort_co2_tower_data
 
     !--------------------------------------------------------------------------
-    ! xb_to_co2tower
+    ! xb_to_co2_tower
     !
     ! Translate background state vector to CO2 concentration value at tower
     ! locations.
@@ -264,7 +264,7 @@ contains
     ! vertically.
     !
     !--------------------------------------------------------------------------
-    subroutine xb_to_co2tower(inputfile, xb, ix, jx, kx, nv, iob, hxb)
+    subroutine xb_to_co2_tower(inputfile, xb, ix, jx, kx, nv, iob, hxb)
         implicit none
         character(len=10), intent(in)           :: inputfile
         character(len=10)                       :: obstype
@@ -315,6 +315,6 @@ contains
 
         return
 
-    end subroutine xb_to_co2tower
+    end subroutine xb_to_co2_tower
 
 end module co2

@@ -317,7 +317,7 @@ obs_cycle: do ig=1,ceiling(real(obs%num)/nob)
        else if ( obstype(1:5) == 'ideal' ) then
          call xb_to_idealsound(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
        else if ( trim(obstype) == 'co2tower' ) then
-         call xb_to_co2tower(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
+         call xb_to_co2_tower(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
        endif
      endif
    enddo
