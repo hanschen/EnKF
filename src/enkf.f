@@ -105,6 +105,7 @@ use obs_define
 use mpi_module
 use netcdf
 use radar 
+use co2
 implicit none
 ! variable description:
 ! numbers_en = number of ensemble members (n)
@@ -315,6 +316,8 @@ obs_cycle: do ig=1,ceiling(real(obs%num)/nob)
          call xb_to_pw(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,znu,znw,yasend(iob,ie))
        else if ( obstype(1:5) == 'ideal' ) then
          call xb_to_idealsound(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
+       else if ( trim(obstype) == 'co2tower' ) then
+         call xb_to_co2tower(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
        endif
      endif
    enddo
