@@ -52,7 +52,7 @@ contains
         if (height < height_lower) then
             height_to_k = height - height_lower
         else if (height > height_upper) then
-            height_to_k = height_upper - height
+            height_to_k = 0
         else
             alpha = (height - height_lower)/(height_upper - height_lower)
             height_to_k = k1 + alpha
