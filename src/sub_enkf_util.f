@@ -484,7 +484,7 @@ real, allocatable, dimension(:,:,:) :: dat3d
 if ( my_proc_id == 0 ) then
   write(*, *)'   '
   write(*, *)'---------------------------------------------------'
-  write(*, *)'.... Getting initial ensemble filed ....'
+  write(*, *)'.... Getting initial ensemble field ....'
 endif
 do n=1,nm
   ie=(n-1)*nmcpu+gid+1
