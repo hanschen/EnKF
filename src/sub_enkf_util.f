@@ -250,7 +250,7 @@ subroutine  read_namelist(ix, jx, kx)
    read ( unit = namelist_unit, nml = co2_tower_obs, iostat = iost )
    if( iost .ne. 0 ) then
        write(*,*)'co2_tower_obs, please check it.'
-       stop 'read_namelist co2_tower_obs'
+       ! stop 'read_namelist co2_tower_obs'
    endif
 
    if( update_is <= 1 .or. update_is >=ix ) update_is = 1
