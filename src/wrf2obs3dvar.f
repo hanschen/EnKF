@@ -8,7 +8,7 @@ use constants
 
 implicit none
 character (len=125)        :: str
-character (len=80)         :: obs_3dvar_file,obsfile1,obsfile2,truthfile,times,times1
+character (len=80)         :: obs_3dvar_file,obsfile1,truthfile,times,times1
 character (len=180)        :: fmt_fmt, info_fmt, srfc_fmt, each_fmt
 integer                    :: synop,metar,ship,buoy,bogus,temp,amdar,airep,tamdar,pilot, &
                               satem, satob, gpspw, gpszd, gpsrf,gpsep,ssmt1,ssmt2,     &
@@ -42,11 +42,9 @@ real :: obs_q,obs_pres,obs_temp
 
 character (len=14) :: tstr
 character (len=80) :: dt
-integer*8 :: t1,t2
 
 obs_3dvar_file = 'obs_3dvar.ascii'
-obsfile1 = 'obs1.ascii'
-obsfile2 = 'obs2.ascii'
+obsfile1 = 'obs.ascii'
 truthfile='wrfout.truth'
 gridobs_is=1
 gridobs_ie=333
@@ -141,18 +139,9 @@ read(10,*)
 do n = 1, total
    read(10, fmt=info_fmt) platform,date,name,obs_level,latitude,longitude,elevation,id
    read(10, fmt=srfc_fmt) slp(1),qcint(1),slp(3),pw(1),qcint(2),pw(3)
-   tstr=date(1:4)//date(6:7)//date(9:10)//date(12:13)//date(15:16)//date(18:19)
-   read(tstr,'(i14)') t1
-   tstr=times(1:4)//times(6:7)//times(9:10)//times(12:13)//times(15:16)//times(18:19)
-   read(tstr,'(i14)') t2
    if ( platform(4:6).eq.'35 ' ) then
-     if(t1.lt.t2) then
-       total1=total1+1
-       temp1=temp1+1
-     else
-       total2=total2+1
-       temp2=temp2+1
-     endif
+     total1=total1+1
+     temp1=temp1+1
    endif
    do k = 1, obs_level
      read(10,*)
@@ -183,8 +172,6 @@ close(10)
 !write wrf output observations to the obs_3dvar format
 open(11,file=obsfile1,status='replace',form='formatted',iostat=iost)
 if(iost .ne. 0) write(*,*) 'error opening ',obsfile1
-open(12,file=obsfile2,status='replace',form='formatted',iostat=iost)
-if(iost .ne. 0) write(*,*) 'error opening ',obsfile2
 
 write(11,fmt='(a,i7,a,f8.0,a)') 'TOTAL =', total1, ', MISS. =',-888888.,','
 write(11, fmt='(6(a,i7,a))') 'SYNOP =',synop,', ','METAR =',metar,', ','SHIP  =',ship,', ',&
@@ -221,10 +208,6 @@ end do
 do n=1,total
    read(10, fmt=info_fmt)platform,date,name,obs_level,latitude,longitude,elevation,id
    read(10, fmt=srfc_fmt)slp(1),qcint(1),slp(3),pw(1),qcint(2),pw(3)
-   tstr=date(1:4)//date(6:7)//date(9:10)//date(12:13)//date(15:16)//date(18:19)
-   read(tstr,'(i14)') t1
-   tstr=times(1:4)//times(6:7)//times(9:10)//times(12:13)//times(15:16)//times(18:19)
-   read(tstr,'(i14)') t2
 
    if ( platform(4:6)=='35 ') then
      call latlon_to_ij(proj,latitude,longitude,obs_ii,obs_jj)
@@ -246,11 +229,7 @@ do n=1,total
 !       if(pw(1).ne.-888888.) then !pw
 !       endif
 !     endif
-     if(t1.lt.t2) then
-       ounit=11
-     else
-       ounit=12
-     endif
+     ounit=11
      write(ounit,fmt=info_fmt)platform,date,name,obs_level,latitude,longitude,elevation,id
      write(ounit, fmt=srfc_fmt)slp(1),qcint(1),slp(3),pw(1),qcint(2),pw(3)
    endif
