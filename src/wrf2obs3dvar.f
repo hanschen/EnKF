@@ -183,16 +183,6 @@ write(11, fmt='(6(a,i7,a))') 'GPSPW =',gpspw,', ','GPSZD =',gpszd,', ','GPSRF ='
 write(11, fmt='(5(a,i7,a))') 'TOVS  =',tovs, ', ','QSCAT =',qscat,', ','PROFL =',profl,', ',&
                              'AIRSR =',airsr,', ','OTHER =',other,', '
 
-write(12,fmt='(a,i7,a,f8.0,a)') 'TOTAL =', total2, ', MISS. =',-888888.,','
-write(12, fmt='(6(a,i7,a))') 'SYNOP =',synop,', ','METAR =',metar,', ','SHIP  =',ship,', ',&
-                             'BUOY  =',buoy, ', ','BOGUS =',bogus,', ','TEMP  =',temp2,', '
-write(12, fmt='(6(a,i7,a))') 'AMDAR =',amdar,', ','AIREP =',airep,', ','TAMDAR=',tamdar,', ',&
-                             'PILOT =',pilot,', ','SATEM =',satem,', ','SATOB =',satob2,', '
-write(12, fmt='(6(a,i7,a))') 'GPSPW =',gpspw,', ','GPSZD =',gpszd,', ','GPSRF =',gpsrf,', ',&
-                             'GPSEP =',gpsep,', ','SSMT1 =',ssmt1,', ','SSMT2 =',ssmt2,', '
-write(12, fmt='(5(a,i7,a))') 'TOVS  =',tovs, ', ','QSCAT =',qscat,', ','PROFL =',profl,', ',&
-                             'AIRSR =',airsr,', ','OTHER =',other,', '
-
 open(10,file=obs_3dvar_file,status='old',form='formatted',iostat=iost)
 !same header as obs_3dvar
 do i=1,5
@@ -201,7 +191,6 @@ end do
 do i=1,16
   read(10,'(a)') str
   write(11,'(a)') str
-  write(12,'(a)') str
 end do
 
 !write observations
@@ -400,7 +389,6 @@ close(10)
 ! enddo
 
 close(11)
-close(12)
 end program wrf2obs3dvar
 
 !==============================================================================
