@@ -145,15 +145,6 @@ do n = 1, total
    read(tstr,'(i14)') t1
    tstr=times(1:4)//times(6:7)//times(9:10)//times(12:13)//times(15:16)//times(18:19)
    read(tstr,'(i14)') t2
-   if ( platform(4:6).eq.'88 ' ) then
-     if(t1.lt.t2) then
-       total1=total1+1
-       satob1=satob1+1
-     else
-       total2=total2+1
-       satob2=satob2+1
-     endif
-   endif
    if ( platform(4:6).eq.'35 ' ) then
      if(t1.lt.t2) then
        total1=total1+1
@@ -235,7 +226,7 @@ do n=1,total
    tstr=times(1:4)//times(6:7)//times(9:10)//times(12:13)//times(15:16)//times(18:19)
    read(tstr,'(i14)') t2
 
-   if ( platform(4:6)=='88 ' .or. platform(4:6)=='35 ') then
+   if ( platform(4:6)=='35 ') then
      call latlon_to_ij(proj,latitude,longitude,obs_ii,obs_jj)
      i1 = int( obs_ii )
      j1 = int( obs_jj )
@@ -249,7 +240,7 @@ do n=1,total
      ptt(1:kx) = dym*(dx*pt(i1+1,j1,1:kx) + dxm*pt(i1,j1,1:kx)) + dy*(dx*pt(i1+1,j1+1,1:kx) + dxm*pt(i1,j1+1,1:kx))
      zgt(1:kx+1) = dym*(dx*zg(i1+1,j1,1:kx+1) + dxm*zg(i1,j1,1:kx+1)) + dy*(dx*zg(i1+1,j1+1,1:kx+1) + dxm*zg(i1,j1+1,1:kx+1))
      call eta_to_pres(znw0(1:kx+1), mu1+mub1, qvt(1:kx), zgt(1:kx+1), ptt(1:kx)+to, kx, pres(1:kx))
-!     if (platform(4:6)=='35 ' .or. platform(4:6)=='88 ' ) then  !screening
+!     if (platform(4:6)=='35 ' ) then  !screening
 !       if(slp(1).ne.-888888.) then !slp
 !       endif
 !       if(pw(1).ne.-888888.) then !pw
@@ -266,7 +257,7 @@ do n=1,total
 
    do k = 1, obs_level
      read(10, fmt=each_fmt)((obs_data(i,1),qcint(i),obs_data(i,3)),i=1,7)
-     if ( platform(4:6)=='88 ' .or. platform(4:6)=='35 ' ) then    !screening
+     if ( platform(4:6)=='35 ' ) then    !screening
         call to_zk(obs_data(1,1), pres(1:kx), obs_kk, kx)
         if ( obs_kk .lt. 1. ) obs_kk = 1.
         k1  = int( obs_kk )
