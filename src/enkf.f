@@ -360,6 +360,12 @@ else
   y=obs%dat
 end if
 
+if ( my_proc_id==0 ) then
+   write(*, '(a6, a20, a12, a12, a10, a10, a8, a6, 3a8)') &
+      'no', 'type', 'y', 'ya', 'y-ya', 'error', 'hroi', 'vroi', 'i', 'j', 'k'
+   write(*, '(a108)') '------------------------------------------------------------------------------------------------------------'
+end if
+
 obs_assimilate_cycle : do it = 1,obs%num
 ! 0. get basic information of the obs being assimilated
    iob=ind(it)
@@ -367,9 +373,10 @@ obs_assimilate_cycle : do it = 1,obs%num
    obstype = obs%type(iob)
    error = obs%err(iob)
    y_hxm = y(iob) - ya(iob,numbers_en+1)
-   if ( my_proc_id==0 ) write(*,'(a,i6,a,f10.2,a,f10.2,a,f8.2,a,f8.2,a,i4,a,i4,3f5.1)') &
-      'No.',iob,' '//obstype//' =',y(iob), ' ya=', ya(iob,numbers_en+1), ' y-ya=', y_hxm, &
-      ' err=',error,'hroi=',obs%roi(iob,1),'vroi=',obs%roi(iob,2),obs%position(iob,1:3)
+   if ( my_proc_id==0 ) then
+      write(*,'(i6, a20, f12.2, f12.2, f10.2, f10.2, i8, i6, 3f8.1)') &
+          iob, trim(obstype), y(iob), ya(iob,numbers_en+1), y_hxm, error, obs%roi(iob,1), obs%roi(iob,2), obs%position(iob,1:3)
+   end if
    if( abs(y_hxm)>(error*5.) .and. &
        .not.(obstype=='min_slp   ' .or. obstype=='longtitude' .or. obstype=='latitude  ') .and. &
        (trim(obstype) /= 'co2tower') ) then
