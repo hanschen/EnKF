@@ -412,12 +412,26 @@ t0=MPI_Wtime()
    enddo
    if ( update_flag==0 ) cycle update_x_var
 ! start and end indices of the update zone of the obs
-   ist = max( update_is, int(obs%position(iob,1))-ngx ) 
-   ied = min( update_ie, int(obs%position(iob,1))+ngx ) 
-   jst = max( update_js, int(obs%position(iob,2))-ngx ) 
-   jed = min( update_je, int(obs%position(iob,2))+ngx ) 
-   kst = max( update_ks, int(obs%position(iob,3))-ngz ) 
-   ked = min( update_ke, int(obs%position(iob,3))+ngz ) 
+   if (ngx < 0) then
+       ist = update_is
+       ied = update_ie
+       jst = update_js
+       jed = update_je
+   else
+       ist = max( update_is, int(obs%position(iob,1))-ngx ) 
+       ied = min( update_ie, int(obs%position(iob,1))+ngx ) 
+       jst = max( update_js, int(obs%position(iob,2))-ngx ) 
+       jed = min( update_je, int(obs%position(iob,2))+ngx ) 
+   end if
+
+   if (ngz < 0) then
+       kst = update_ks
+       ked = update_ke
+   else
+       kst = max( update_ks, int(obs%position(iob,3))-ngz ) 
+       ked = min( update_ke, int(obs%position(iob,3))+ngz ) 
+   end if
+
    call wrf_var_dimension ( wrf_file, varname, ix, jx, kx, ii, jj, kk )
    if ( kk == 1 ) then
      kst  = 1

@@ -44,6 +44,7 @@
 
   real, intent(in)    :: dx,dy,dz        !dx: x distance(grids) from model grid to obs
   integer, intent(in) :: ngx, ngz        !ngx: horrizontal cutting off distances
+  real :: cdx, cdy, cdz                  !distances (grids) used in computations
   integer :: i,j,k
   real, intent(out)   :: corr_coef
 
@@ -52,21 +53,35 @@
   real :: comp_cov_factor
   real :: horrad, distance, distanceh
 
+! check which distances should be considered
+      cdx = dx
+      cdy = dy
+      cdz = dz
+
+      if (ngx < 0) then
+          cdx = 0.
+          cdy = 0.
+      end if
+
+      if (ngz < 0.) then
+          cdz = 0.
+      end if
+
 ! calculate horizontal radius at height k
-     horrad = (real(ngx)/real(ngz))*sqrt(real(ngz**2. - dz**2.))
+     horrad = (real(ngx)/real(ngz))*sqrt(real(ngz**2. - cdz**2.))
      horradi = int(horrad)   ! grid points within the radius
 
 ! equivalence of k in terms of dx  ! added FZ 2004/09/09
-     k1 = dz * real(ngx) / real(ngz)
+     k1 = cdz * real(ngx) / real(ngz)
 
-        distanceh = sqrt(real(dx**2. + dy**2.))   ! hor. distance from z-axis
+        distanceh = sqrt(real(cdx**2. + cdy**2.))   ! hor. distance from z-axis
 
-        if ((dx==0.) .and. (dy==0.) .and. (dz==0.)) then
+        if ((cdx==0.) .and. (cdy==0.) .and. (cdz==0.)) then
            corr_coef = 1.
 
         else if (distanceh<=horrad) then
 
-           distance  = sqrt( real(dx**2. + dy**2. + k1**2.))   ! 3-d distance from obs
+           distance  = sqrt( real(cdx**2. + cdy**2. + k1**2.))   ! 3-d distance from obs
 
            corr_coef  = comp_cov_factor(dble(distance),dble(ngx/2.))
 
