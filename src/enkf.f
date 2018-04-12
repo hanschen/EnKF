@@ -127,12 +127,13 @@ character (len=80), intent(in) :: times
 ! fac = 1/(n-1) used for averaging in variance calculation
 ! corr_coef = localization factor
 ! ngx, ngz = roi in horizontal and vertical
+! var_ngx, var_ngz = variable-specific roi in horizontal and vertical
 ! var,cov = error variance,covariance of something
 ! y_hxm = y-hxm (the innovation vector, mean), hxa is the perturbation (of ensemble members).
 real      :: fac,d,alpha,var,cov,y_hxm,corr_coef
 real      :: var_a,var_b,m_d2,m_var_a,m_var_b, la,ka
 real,dimension(numbers_en) :: hxa
-integer   :: ngx, ngz
+integer   :: ngx, ngz, var_ngx, var_ngz
 integer   :: i, j, k, m, n, iob, iiob, nob, ie, iunit,ounit,ii, jj, kk, is, it, ig, iv, i1,j1, itot
 integer   :: ist,ied,jst,jed,kst,ked, istart,iend,jstart,jend, uist,uied,ujst,ujed
 integer   :: sist,sied,sjst,sjed, sistart,siend,sjstart,sjend,sis,sie,sjs,sje
@@ -411,25 +412,34 @@ t0=MPI_Wtime()
      if ( varname .eq. updatevar(iv) ) update_flag = 1
    enddo
    if ( update_flag==0 ) cycle update_x_var
+
+   if (varname(1:7) == 'SCALING') then
+      var_ngx = hroi_co2_scaling
+      var_ngz = -1
+   else
+      var_ngx = ngx
+      var_ngz = ngz
+   end if
+
 ! start and end indices of the update zone of the obs
-   if (ngx < 0) then
+   if (var_ngx < 0) then
        ist = update_is
        ied = update_ie
        jst = update_js
        jed = update_je
    else
-       ist = max( update_is, int(obs%position(iob,1))-ngx ) 
-       ied = min( update_ie, int(obs%position(iob,1))+ngx ) 
-       jst = max( update_js, int(obs%position(iob,2))-ngx ) 
-       jed = min( update_je, int(obs%position(iob,2))+ngx ) 
+       ist = max( update_is, int(obs%position(iob,1))-var_ngx ) 
+       ied = min( update_ie, int(obs%position(iob,1))+var_ngx ) 
+       jst = max( update_js, int(obs%position(iob,2))-var_ngx ) 
+       jed = min( update_je, int(obs%position(iob,2))+var_ngx ) 
    end if
 
-   if (ngz < 0) then
+   if (var_ngz < 0) then
        kst = update_ks
        ked = update_ke
    else
-       kst = max( update_ks, int(obs%position(iob,3))-ngz ) 
-       ked = min( update_ke, int(obs%position(iob,3))+ngz ) 
+       kst = max( update_ks, int(obs%position(iob,3))-var_ngz ) 
+       ked = min( update_ke, int(obs%position(iob,3))+var_ngz ) 
    end if
 
    call wrf_var_dimension ( wrf_file, varname, ix, jx, kx, ii, jj, kk )
@@ -567,7 +577,7 @@ t0=MPI_Wtime()
    do k = kst,ked
    do j = ujst,ujed
    do i = uist,uied
-     call corr(real(i-obs%position(iob,1)),real(j-obs%position(iob,2)),real(k-obs%position(iob,3)),ngx,ngz,corr_coef)
+     call corr(real(i-obs%position(iob,1)),real(j-obs%position(iob,2)),real(k-obs%position(iob,3)),var_ngx,var_ngz,corr_coef)
      if ( obstype == 'longtitude' .or. obstype == 'latitude  ' ) corr_coef = 1.0
      km(i-uist+1,j-ujst+1,k-kst+1) = km(i-uist+1,j-ujst+1,k-kst+1) * corr_coef
    enddo
@@ -721,12 +731,12 @@ enddo update_x_var
 !    ym=ym+corr_coef*hBh'(y-ym)/d
 !    ya=ya+alpha*corr_coef*hBh'(0-ya)/d
 !    --- basically these are the update equations of x left-multiplied by H.
-   ist = max( update_is, int(obs%position(iob,1))-ngx )
-   ied = min( update_ie, int(obs%position(iob,1))+ngx )
-   jst = max( update_js, int(obs%position(iob,2))-ngx )
-   jed = min( update_je, int(obs%position(iob,2))+ngx )
-   kst = max( update_ks, int(obs%position(iob,3))-ngz )
-   ked = min( update_ke, int(obs%position(iob,3))+ngz )
+   ist = max( update_is, int(obs%position(iob,1))-var_ngx )
+   ied = min( update_ie, int(obs%position(iob,1))+var_ngx )
+   jst = max( update_js, int(obs%position(iob,2))-var_ngx )
+   jed = min( update_je, int(obs%position(iob,2))+var_ngx )
+   kst = max( update_ks, int(obs%position(iob,3))-var_ngz )
+   ked = min( update_ke, int(obs%position(iob,3))+var_ngz )
    update_y_cycle : do iiob=1,obs%num
 ! skip those ya outside update zone
       if ( obs%position(iiob,1)<ist .or. obs%position(iiob,1)>ied .or. &
