@@ -126,7 +126,7 @@ character (len=10)  :: obstype
 character (len=80), intent(in) :: times
 ! fac = 1/(n-1) used for averaging in variance calculation
 ! corr_coef = localization factor
-! ngx, ngz = roi in horizontall and vertical
+! ngx, ngz = roi in horizontal and vertical
 ! var,cov = error variance,covariance of something
 ! y_hxm = y-hxm (the innovation vector, mean), hxa is the perturbation (of ensemble members).
 real      :: fac,d,alpha,var,cov,y_hxm,corr_coef
