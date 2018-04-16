@@ -68,7 +68,11 @@
       end if
 
 ! calculate horizontal radius at height k
-     horrad = (real(ngx)/real(ngz))*sqrt(real(ngz**2. - cdz**2.))
+     if (ngz >= 0.) then
+        horrad = (real(ngx)/real(ngz))*sqrt(real(ngz**2. - cdz**2.))
+     else
+        horrad = real(ngx)
+     end if
      horradi = int(horrad)   ! grid points within the radius
 
 ! equivalence of k in terms of dx  ! added FZ 2004/09/09
