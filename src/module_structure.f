@@ -164,7 +164,7 @@ module namelist_define
    integer       :: vroi_co2_tower      ! vertical radius of influence for CO2 tower
 
 !-- co2_inversion
-   integer       :: hroi_co2_scaling    ! horizontal radius of influence for CO2 scaling factors
+   integer       :: hroi_co2_scaling_factors  ! horizontal radius of influence for CO2 scaling factors
 
 !-- Namelist contents :
 
@@ -188,7 +188,7 @@ module namelist_define
    namelist /radar_obs      / radar_number, use_radar_rf, use_radar_rv, datathin_radar, hroi_radar, vroi_radar
    namelist /airborne_radar / use_airborne_rf, use_airborne_rv, datathin_airborne, hroi_airborne, vroi_airborne
    namelist /co2_tower_obs  / use_co2_tower, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower
-   namelist /co2_inversion  / hroi_co2_scaling
+   namelist /co2_inversion  / hroi_co2_scaling_factors
 
 
 end module namelist_define
