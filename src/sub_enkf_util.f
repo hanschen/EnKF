@@ -151,6 +151,9 @@ subroutine  read_namelist(ix, jx, kx)
    datathin_co2_tower = 999
    hroi_co2_tower     = 999
    vroi_co2_tower     = 999
+
+!-- co2_inversion
+   hroi_co2_scaling_factors = 999
    
 !------------------------------------------------------------------------
 !  [2.0] read namelist 
@@ -251,6 +254,11 @@ subroutine  read_namelist(ix, jx, kx)
    if( iost .ne. 0 ) then
        write(*,*)'co2_tower_obs, please check it.'
        ! stop 'read_namelist co2_tower_obs'
+   endif
+   read ( unit = namelist_unit, nml = co2_inversion, iostat = iost )
+   if( iost .ne. 0 ) then
+       write(*,*)'co2_inversion, please check it.'
+       ! stop 'read_namelist co2_inversion'
    endif
 
    if( update_is <= 1 .or. update_is >=ix ) update_is = 1
