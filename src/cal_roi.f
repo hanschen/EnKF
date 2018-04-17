@@ -36,65 +36,68 @@
 
    end subroutine cal_hroi
 !========================================================================================
-   subroutine corr(dx,dy,dz,ngx,ngz,corr_coef)
+subroutine corr(dx,dy,dz,ngx,ngz,corr_coef)
 ! This is alternative routine to calculate corr_coef, if schur_matrix
 ! requires too much memory to be calculated before hand.
 
-  implicit none
+implicit none
 
-  real, intent(in)    :: dx,dy,dz        !dx: x distance(grids) from model grid to obs
-  integer, intent(in) :: ngx, ngz        !ngx: horrizontal cutting off distances
-  real :: cdx, cdy, cdz                  !distances (grids) used in computations
-  integer :: i,j,k
-  real, intent(out)   :: corr_coef
+real, intent(in)    :: dx,dy,dz        !dx: x distance(grids) from model grid to obs
+integer, intent(in) :: ngx, ngz        !ngx: horrizontal cutting off distances
+integer :: i,j,k
+real, intent(out)   :: corr_coef
 
-  integer :: horradi
-  real :: k1
-  real :: comp_cov_factor
-  real :: horrad, distance, distanceh
+real :: k1
+real :: comp_cov_factor
+real :: horrad, distance, distanceh
 
-! check which distances should be considered
-      cdx = dx
-      cdy = dy
-      cdz = dz
+if ((dx==0.) .and. (dy==0.) .and. (dz==0.)) then
+    corr_coef = 1.
+    return
+end if
 
-      if (ngx < 0) then
-          cdx = 0.
-          cdy = 0.
-      end if
+if ((ngx < 0) .and. (ngz < 0)) then
+    corr_coef = 1.
+    return
+end if
 
-      if (ngz < 0.) then
-          cdz = 0.
-      end if
+! horizontal distance from z-axis
+distanceh = sqrt(real(dx**2. + dy**2.))
 
-! calculate horizontal radius at height k
-     if (ngz >= 0.) then
-        horrad = (real(ngx)/real(ngz))*sqrt(real(ngz**2. - cdz**2.))
-     else
-        horrad = real(ngx)
-     end if
-     horradi = int(horrad)   ! grid points within the radius
+if (ngx < 0) then
+    ! localize only in the vertical
+    distance = dz
+    corr_coef  = comp_cov_factor(dble(distance), dble(ngz/2.))
+    return
+else if (ngz < 0) then
+    ! localize only in the horizontal
+    if (distanceh <= ngx) then
+        distance = distanceh
+        corr_coef = comp_cov_factor(dble(distance), dble(ngx/2.))
+    else
+        corr_coef = 0
+    end if
+    return
+else
+    ! localize in both the horizontal and vertical
 
-! equivalence of k in terms of dx  ! added FZ 2004/09/09
-     k1 = cdz * real(ngx) / real(ngz)
+    ! calculate horizontal radius at height k
+    horrad = (real(ngx)/real(ngz))*sqrt(real(ngz**2. - dz**2.))
 
-        distanceh = sqrt(real(cdx**2. + cdy**2.))   ! hor. distance from z-axis
+    ! equivalence of k in terms of dx  ! added FZ 2004/09/09
+    k1 = dz * real(ngx) / real(ngz)
 
-        if ((cdx==0.) .and. (cdy==0.) .and. (cdz==0.)) then
-           corr_coef = 1.
+    if (distanceh <= horrad) then
+        ! 3-d distance from obs
+        distance = sqrt(real(dx**2. + dy**2. + k1**2.))
+        corr_coef = comp_cov_factor(dble(distance), dble(ngx/2.))
+    else
+        corr_coef = 0.
+    end if
+    return
+end if
 
-        else if (distanceh<=horrad) then
-
-           distance  = sqrt( real(cdx**2. + cdy**2. + k1**2.))   ! 3-d distance from obs
-
-           corr_coef  = comp_cov_factor(dble(distance),dble(ngx/2.))
-
-        else
-           corr_coef  = 0.
-
-        end if
-
-   end subroutine corr
+end subroutine corr
 !========================================================================================
    subroutine corr_matrix(nx,nz,cmatr)
 
