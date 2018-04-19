@@ -67,7 +67,11 @@ distanceh = sqrt(real(dx**2. + dy**2.))
 if (ngx < 0) then
     ! localize only in the vertical
     distance = dz
-    corr_coef  = comp_cov_factor(dble(distance), dble(ngz/2.))
+    if (distance <= ngz) then
+        corr_coef  = comp_cov_factor(dble(distance), dble(ngz/2.))
+    else
+        corr_coef = 0.
+    end if
     return
 else if (ngz < 0) then
     ! localize only in the horizontal
