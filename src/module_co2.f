@@ -113,8 +113,9 @@ contains
         integer                                     :: ierr
         integer                                     :: nlines
 
-        character (len=80)                          :: tower_name
-        real                                        :: lat, lon, elev, co2
+        character (len=80)                          :: tower_name, tower_type
+        real                                        :: lat, lon, height, &
+                                                       elev, co2
         integer                                     :: iwrf, jwrf, kwrf
 
         real                                        :: aio, ajo, ako
