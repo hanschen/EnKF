@@ -231,7 +231,6 @@ contains
     subroutine sort_co2_tower_data(ix, jx, datathin, hroi, vroi)
         implicit none
 
-        real, parameter                      :: CO2_ERROR = 1
         real, parameter                      :: HEIGHT_TOLERENCE = 100
         integer, intent(in)                  :: ix, jx
         integer, intent(in)                  :: datathin, hroi, vroi
@@ -284,7 +283,7 @@ contains
                 obs%num                 = obs%num + 1
                 obs%dat     (obs%num  ) = raw%co2_tower%co2(n)
                 obs%type    (obs%num  ) = 'co2tower  '
-                obs%err     (obs%num  ) = CO2_ERROR
+                obs%err     (obs%num  ) = co2_error
                 obs%position(obs%num,1) = ii
                 obs%position(obs%num,2) = jj
                 obs%position(obs%num,3) = kk

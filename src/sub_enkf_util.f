@@ -151,6 +151,7 @@ subroutine  read_namelist(ix, jx, kx)
    datathin_co2_tower = 999
    hroi_co2_tower     = 999
    vroi_co2_tower     = 999
+   co2_error          = 1.
 
 !-- co2_inversion
    hroi_co2_scaling_factors = 999
@@ -383,6 +384,7 @@ subroutine  read_namelist(ix, jx, kx)
          write(6,'(a      )') ' ===== assimilate TOWER CO2 CONCENTRATION ===== '
          write(6,'(a,i4   )') '       data thinning: ',datathin_co2_tower
          write(6,'(a,2i4  )') '       ROI for horizonal and vertical is:', hroi_co2_tower, vroi_co2_tower
+         write(6,'(a,f6.2 )') '       CO2 error in ppm is: ', co2_error
       endif
 
    endif
