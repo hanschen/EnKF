@@ -98,7 +98,7 @@ call MPI_Comm_split(comm, sid, gid, g_comm, ierr)
 
 !-- allocate wrf variables, 2d->x2, 3d->x
 nv = 0
-do m=1,30 
+do m=1,size(enkfvar) 
   if(len_trim(enkfvar(m))>=1) nv=nv+1
 enddo
 ni=int((ix+1)/nicpu)+1

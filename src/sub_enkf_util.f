@@ -21,7 +21,7 @@ subroutine  read_namelist(ix, jx, kx)
    character(len=80)   :: namelist_file       ! Input namelist filename.
    integer, parameter  :: namelist_unit=7   ! Input namelist unit.
    integer             :: iost               ! Error code.
-   integer             :: i
+   integer             :: i, m, n_updatevar, n_enkfvar
 
 !------------------------------------------------------------------------------
 !  [1.0] namelist initialize
@@ -270,14 +270,28 @@ subroutine  read_namelist(ix, jx, kx)
    if( update_ks <= 1 .or. update_ks >=kx ) update_ks = 1
    if( update_ke <= 1 .or. update_ke >=kx ) update_ke = kx
 
+   n_enkfvar = 0
+   do m = 1, size(enkfvar) 
+      if (len_trim(enkfvar(m)) > 0) then
+          n_enkfvar = n_enkfvar + 1
+      end if
+   enddo
+
+   n_updatevar = 0
+   do m = 1, size(updatevar) 
+      if (len_trim(updatevar(m)) > 0) then
+          n_updatevar = n_updatevar + 1
+      end if
+   enddo
+
    if ( my_proc_id == 0 ) then
       write(6, *)'   '
       write(6, *)'---------------------------------------------------'
       write(6, *)'.... namelist info ....'
       write(6,'(a,3x,i5    )') ' numbers_en = ',numbers_en 
       write(6,'(a,3x,a10   )') ' expername  = ',expername
-      write(6,'(a,3x,20a   )') ' enkfvar = ',enkfvar
-      write(6,'(a,3x,20a   )') ' updatevar = ',updatevar
+      write(6,'(a,3x,20a   )') ' enkfvar = ',enkfvar(1:n_enkfvar)
+      write(6,'(a,3x,20a   )') ' updatevar = ',updatevar(1:n_updatevar)
       write(6,'(a18,i3,5(a1,i3))') ' update domain  : ',update_is,':',update_ie,'; ',update_js,':',update_je,'; ',update_ks,':',update_ke
       write(6,'(a,3x,f5.2   )') ' inflate    = ',inflate  
       write(6,'(a,3x,f5.2   )') ' mixing     = ',mixing  

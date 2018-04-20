@@ -56,8 +56,8 @@ module namelist_define
 !-- enkf_parameter
    integer       :: numbers_en          ! ensemble size
    character(len=10) :: expername       ! experiment name, such as hurricane, clear-air
-   character(len=10), dimension(30) :: enkfvar   ! include the variables which will be updated and be used to calculate the XB
-   character(len=10), dimension(20) :: updatevar ! updated variables
+   character(len=10), dimension(999) :: enkfvar   ! include the variables which will be updated and be used to calculate the XB
+   character(len=10), dimension(999) :: updatevar ! updated variables
    integer       :: update_is, update_ie, update_js, update_je, update_ks, update_ke  ! domain to be updated
    integer       :: relax_opt
    real          :: inflate             !
