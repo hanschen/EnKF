@@ -184,7 +184,7 @@ call get_variable0d( wrf_file, 'P_TOP     ', 1, p_top )
 call open_file(wrf_file, nf_nowrite, fid)
 rcode = nf_get_att_int(fid, nf_global, 'GRID_ID', grid_id)
 num_update_var = 0
-do m = 1, 20
+do m = 1, size(updatevar)
    if ( len_trim(updatevar(m))>=1 ) num_update_var=num_update_var+1
 enddo
 
