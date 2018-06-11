@@ -581,6 +581,8 @@ t0=MPI_Wtime()
      if ( obstype == 'longtitude' .or. obstype == 'latitude  ' ) corr_coef = 1.0
      if (varname(1:3) == 'SF_') then
          corr_coef = (1 - relax_scaling_factors)*corr_coef
+     else if (varname(1:3) == 'CO2') then
+         corr_coef = (1 - relax_co2)*corr_coef
      end if
      km(i-uist+1,j-ujst+1,k-kst+1) = km(i-uist+1,j-ujst+1,k-kst+1) * corr_coef
    enddo
