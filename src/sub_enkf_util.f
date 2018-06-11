@@ -155,7 +155,7 @@ subroutine  read_namelist(ix, jx, kx)
 
 !-- co2_inversion
    hroi_scaling_factors = 999
-   scale_scaling_factors_increment = 1.
+   relax_scaling_factors = 0.
    
 !------------------------------------------------------------------------
 !  [2.0] read namelist 

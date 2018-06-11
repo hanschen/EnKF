@@ -580,7 +580,7 @@ t0=MPI_Wtime()
      call corr(real(i-obs%position(iob,1)),real(j-obs%position(iob,2)),real(k-obs%position(iob,3)),var_ngx,var_ngz,corr_coef)
      if ( obstype == 'longtitude' .or. obstype == 'latitude  ' ) corr_coef = 1.0
      if (varname(1:3) == 'SF_') then
-         corr_coef = corr_coef * scale_scaling_factors_increment
+         corr_coef = (1 - relax_scaling_factors)*corr_coef
      end if
      km(i-uist+1,j-ujst+1,k-kst+1) = km(i-uist+1,j-ujst+1,k-kst+1) * corr_coef
    enddo
