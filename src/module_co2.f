@@ -283,7 +283,7 @@ contains
                 obs%num                 = obs%num + 1
                 obs%dat     (obs%num  ) = raw%co2_tower%co2(n)
                 obs%type    (obs%num  ) = 'co2tower  '
-                obs%err     (obs%num  ) = co2_error
+                obs%err     (obs%num  ) = co2_error_tower
                 obs%position(obs%num,1) = ii
                 obs%position(obs%num,2) = jj
                 obs%position(obs%num,3) = kk
