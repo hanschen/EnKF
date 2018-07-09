@@ -90,7 +90,8 @@ contains
     ! Parameters
     ! ----------
     ! times:
-    !   Time of the observation formatted as %Y%m%d%H%M%S, e.g. 20170503103800.
+    !   Time of the observation formatted as %Y-%m-%d_%H:%M:%S, e.g.
+    !   2017-05_03_10:38:00.
     ! ph:
     !   Unstaggered model geopotential heights.
     ! proj:
