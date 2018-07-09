@@ -342,7 +342,7 @@ contains
         real, dimension(kx)                     :: co2_vert
         integer                                 :: m
         integer                                 :: i_co2 = 0
-        integer                                 :: obs_ii, obs_jj, obs_kk
+        real                                    :: obs_ii, obs_jj, obs_kk
         integer                                 :: i1, j1, k1
         real                                    :: dx, dxm, dy, dym, dz, dzm
 
