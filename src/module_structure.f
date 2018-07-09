@@ -164,6 +164,15 @@ module namelist_define
    integer       :: vroi_co2_tower      ! vertical radius of influence for CO2 tower
    real          :: co2_error_tower     ! error of CO2 tower obs (ppm)
 
+!-- use_co2_airborne
+   logical       :: use_co2_airborne       ! .true. : assimilated CO2 airborne data
+   integer       :: datathin_co2_airborne  ! 0=all data, 2=1/2 data, 10=1/10 data
+                                           ! 2: get the 1st, 3rd, 5th ... data
+                                           !-2: get the 2nd, 4th, 6th ... data
+   integer       :: hroi_co2_airborne      ! horizontal radius of influence for CO2 airborne obs
+   integer       :: vroi_co2_airborne      ! vertical radius of influence for CO2 airborne obs
+   real          :: co2_error_airborne     ! error of CO2 airborne obs (ppm)
+
 !-- co2_inversion
    integer       :: hroi_scaling_factors  ! horizontal radius of influence for CO2 scaling factors
    real          :: relax_scaling_factors ! fraction to relax xa to xb for scaling factors
@@ -191,6 +200,7 @@ module namelist_define
    namelist /radar_obs      / radar_number, use_radar_rf, use_radar_rv, datathin_radar, hroi_radar, vroi_radar
    namelist /airborne_radar / use_airborne_rf, use_airborne_rv, datathin_airborne, hroi_airborne, vroi_airborne
    namelist /co2_tower_obs  / use_co2_tower, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower, co2_error_tower
+   namelist /co2_airborne_obs  / use_co2_airborne, datathin_co2_airborne, hroi_co2_airborne, vroi_co2_airborne, co2_error_airborne
    namelist /co2_inversion  / hroi_scaling_factors, relax_scaling_factors, relax_co2
 
 
@@ -304,12 +314,20 @@ module obs_define
         real, allocatable,dimension(:)             :: co2
    end type co2_tower_type
 
+   type co2_airborne_type
+        integer                                    :: num
+        real, allocatable,dimension(:)             :: latitude, longitude, height
+        real, allocatable,dimension(:)             :: ii, jj, kk
+        real, allocatable,dimension(:)             :: co2
+   end type co2_airborne_type
+
    type raw_type
         integer                                  :: radar_stn_num
         type ( Radar_data_type ), allocatable,dimension( : )  :: radar
         type ( airborne_data_type  )             :: airborne
         type ( gts_data_type      )              :: gts
         type ( co2_tower_type     )              :: co2_tower
+        type ( co2_airborne_type     )           :: co2_airborne
    end type raw_type
 
    type obs_type

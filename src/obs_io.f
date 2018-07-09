@@ -88,6 +88,11 @@ if ( use_co2_tower ) then
     call get_co2_tower_obs ( times, ph, proj )
 endif
 
+! CO2 airborne data
+if ( use_co2_airborne ) then
+    call get_co2_airborne_obs ( times, ph, proj )
+endif
+
 !  if ( use_radar_rv ) call output_simulated_rv ( "asimulated_rv" )
 !   if ( use_simulated ) call simulated_obser ( wrf_file, ix, jx, kx, proj )
 ! Add all obs type observations into obs%dat(num_rv)
@@ -140,6 +145,9 @@ if ( use_hurricane_PI ) iobs = iobs + 3            ! for hurricane center lat an
 
 !. calculate CO2 tower records
 if ( use_co2_tower ) iobs = iobs + raw%co2_tower%num
+
+!. calculate CO2 airborne records
+if ( use_co2_airborne ) iobs = iobs + raw%co2_airborne%num
 
 if(my_proc_id==0) write(*,*)iobs,' observation data will be loaded'
 
@@ -265,6 +273,11 @@ obs%num = 0               ! obs%num for all observation, not only Rv
 !....... CO2 concentration from towers
    if ( use_co2_tower ) then
       call sort_co2_tower_data( ix, jx, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower )
+   endif
+
+!....... CO2 concentration from airborne observations
+   if ( use_co2_airborne ) then
+      call sort_co2_airborne_data( ix, jx, datathin_co2_airborne, hroi_co2_airborne, vroi_co2_airborne )
    endif
 
    if(my_proc_id==0) write(*,*)obs%num,' observation data will be assimilated'

@@ -153,6 +153,13 @@ subroutine  read_namelist(ix, jx, kx)
    vroi_co2_tower     = 999
    co2_error_tower    = 1.
 
+!-- use_co2_airborne
+   use_co2_airborne      = .false. 
+   datathin_co2_airborne = 999
+   hroi_co2_airborne     = 999
+   vroi_co2_airborne     = 999
+   co2_error_airborne    = 1.
+
 !-- co2_inversion
    hroi_scaling_factors = 999
    relax_scaling_factors = 0.
@@ -257,6 +264,11 @@ subroutine  read_namelist(ix, jx, kx)
    if( iost .ne. 0 ) then
        write(*,*)'co2_tower_obs, please check it.'
        ! stop 'read_namelist co2_tower_obs'
+   endif
+   read ( unit = namelist_unit, nml = co2_airborne_obs, iostat = iost )
+   if( iost .ne. 0 ) then
+       write(*,*)'co2_airborne_obs, please check it.'
+       ! stop 'read_namelist co2_airborne_obs'
    endif
    read ( unit = namelist_unit, nml = co2_inversion, iostat = iost )
    if( iost .ne. 0 ) then
@@ -401,6 +413,13 @@ subroutine  read_namelist(ix, jx, kx)
          write(6,'(a,i4   )') '       data thinning: ',datathin_co2_tower
          write(6,'(a,2i4  )') '       ROI for horizonal and vertical is:', hroi_co2_tower, vroi_co2_tower
          write(6,'(a,f6.2 )') '       CO2 error in ppm is: ', co2_error_tower
+      endif
+
+      if ( use_co2_airborne ) then
+         write(6,'(a      )') ' ===== assimilate AIRBORNE CO2 CONCENTRATION ===== '
+         write(6,'(a,i4   )') '       data thinning: ',datathin_co2_airborne
+         write(6,'(a,2i4  )') '       ROI for horizonal and vertical is:', hroi_co2_airborne, vroi_co2_airborne
+         write(6,'(a,f6.2 )') '       CO2 error in ppm is: ', co2_error_airborne
       endif
 
    endif

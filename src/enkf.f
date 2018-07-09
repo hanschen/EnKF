@@ -259,7 +259,7 @@ do iob=1,obs%num
          call xb_to_rv(filename,proj,tmp,ix,jx,kx,nv,iob,xlong,znw,xb,0) 
       else if ( obstype(1:1) == 'P' .or. obstype(1:1) == 'H'  ) then
          call xb_to_sounding(filename,proj,tmp,ix,jx,kx,nv,iob,xlong,znu,znw,p_top,xb,1,0)
-      else if ( obstype(1:5) == 'ideal'  .or. trim(obstype) == 'co2tower' )then
+      else if ( obstype(1:5) == 'ideal'  .or. trim(obstype) == 'co2tower' .or. trim(obstype) == 'co2air' )then
          obs%position(iob,3)=obs%position(iob,3)
       else 
          obs%position(iob,3) = 1.
@@ -319,6 +319,8 @@ obs_cycle: do ig=1,ceiling(real(obs%num)/nob)
          call xb_to_idealsound(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
        else if ( trim(obstype) == 'co2tower' ) then
          call xb_to_co2_tower(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
+       else if ( trim(obstype) == 'co2air' ) then
+         call xb_to_co2_airborne(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
        endif
      endif
    enddo
@@ -380,7 +382,7 @@ obs_assimilate_cycle : do it = 1,obs%num
    end if
    if( abs(y_hxm)>(error*5.) .and. &
        .not.(obstype=='min_slp   ' .or. obstype=='longtitude' .or. obstype=='latitude  ') .and. &
-       (trim(obstype) /= 'co2tower') ) then
+       (trim(obstype) /= 'co2tower') .and. trim(obstype) /= 'co2air' ) then
       if ( my_proc_id==0 ) write(*,*)' ...kicked off for large error'
       kick_flag(iob)=1
       cycle obs_assimilate_cycle
