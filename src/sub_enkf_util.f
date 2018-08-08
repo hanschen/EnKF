@@ -151,6 +151,7 @@ subroutine  read_namelist(ix, jx, kx)
    datathin_co2_tower = 999
    hroi_co2_tower     = 999
    vroi_co2_tower     = 999
+   exact_location_tower = .false.
    co2_error_tower    = 1.
    relax_scaling_factors_tower = 0.
    relax_co2_tower    = 0.

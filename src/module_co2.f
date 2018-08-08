@@ -182,15 +182,15 @@ contains
             ako = height_to_k(ph(io,jo,:), elev)
             ko = nint(ako)
 
-            ! Real data
-            ! raw%co2_tower%ii(n) = aio
-            ! raw%co2_tower%jj(n) = ajo
-            ! raw%co2_tower%kk(n) = ako
-
-            ! OSSE
-            raw%co2_tower%ii(n) = iwrf
-            raw%co2_tower%jj(n) = jwrf
-            raw%co2_tower%kk(n) = kwrf
+            if (exact_location_tower) then
+                raw%co2_tower%ii(n) = iwrf
+                raw%co2_tower%jj(n) = jwrf
+                raw%co2_tower%kk(n) = kwrf
+            else
+                raw%co2_tower%ii(n) = aio
+                raw%co2_tower%jj(n) = ajo
+                raw%co2_tower%kk(n) = ako
+            end if
 
             ! Diagnostics
             ! write(*, *) trim(tower_name)
