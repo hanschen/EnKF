@@ -96,7 +96,7 @@ contains
     !   Unstaggered model geopotential heights.
     ! proj:
     !   Model projection (of type proj_info).
-    ! 
+    !
     ! Input files
     ! -----------
     ! tower_%Y%m%d%H%M%S.dat (e.g. tower_20170503103800.dat)
@@ -398,7 +398,7 @@ contains
     !   Unstaggered model geopotential heights.
     ! proj:
     !   Model projection (of type proj_info).
-    ! 
+    !
     ! Input files
     ! -----------
     ! airborne_%Y%m%d%H%M%S.dat (e.g. airborne_20170503103800.dat)
