@@ -675,7 +675,7 @@ subroutine wrf_var_dimension ( wrf_file, var, ix, jx, kx, ii, jj, kk )
         .or. var == 'XLAND     ' .or. var == 'PBLH      ' .or. var == 'HFX       '  &
         .or. var == 'QFX       ' .or. var == 'LH        ' .or. var == 'SNOWC     '  &
         .or. var == 'SR        ' .or. var == 'POTEVP    ' .or. var == 'U10       '  &
-        .or. var == 'V10       ' .or. var(1:3) == 'SF_') then
+        .or. var == 'V10       ' .or. var == 'CO2_SF    ') then
       kk = 1
    else if ( var == 'MAPFAC_U  ' ) then
       kk = 1
