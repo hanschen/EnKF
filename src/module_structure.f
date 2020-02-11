@@ -162,7 +162,6 @@ module namelist_define
                                         !-2: get the 2nd, 4th, 6th ... data
    integer       :: hroi_co2_tower      ! horizontal radius of influence for CO2 tower
    integer       :: vroi_co2_tower      ! vertical radius of influence for CO2 tower
-   logical       :: exact_location_tower! use exact location of towers in OSSE
    real          :: co2_error_tower     ! error of CO2 tower obs (ppm)
    real          :: relax_scaling_factors_tower ! fraction to relax xa to xb for scaling factors for CO2 tower obs
    real          :: relax_co2_tower     ! fraction to relax xa to xb for CO2 for CO2 tower obs
@@ -203,7 +202,7 @@ module namelist_define
    namelist /radar_obs      / radar_number, use_radar_rf, use_radar_rv, datathin_radar, hroi_radar, vroi_radar
    namelist /airborne_radar / use_airborne_rf, use_airborne_rv, datathin_airborne, hroi_airborne, vroi_airborne
    namelist /co2_tower_obs  / use_co2_tower, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower, &
-                              exact_location_tower, co2_error_tower, relax_scaling_factors_tower, relax_co2_tower
+                              co2_error_tower, relax_scaling_factors_tower, relax_co2_tower
    namelist /co2_airborne_obs  / use_co2_airborne, datathin_co2_airborne, hroi_co2_airborne, vroi_co2_airborne, &
                                  co2_error_airborne, relax_scaling_factors_airborne, relax_co2_airborne
    namelist /co2_inversion  / hroi_scaling_factors
