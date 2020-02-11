@@ -26,7 +26,7 @@ contains
     !   Array with model geopotential heights (staggered) with the same units
     !   as ``height``.
     ! height:
-    !   Desired height.
+    !   Desired height above sea level.
     !
     ! Return
     ! ------
@@ -39,12 +39,12 @@ contains
     !   - 0: k is above the highest model level.
     !
     !--------------------------------------------------------------------------
-    function height_to_k(ph, height)
+    function height_to_k(ph, height_msl)
         implicit none
 
         real                                :: height_to_k
         real, dimension(:), intent(in)      :: ph
-        real, intent(in)                    :: height
+        real, intent(in)                    :: height_msl
 
         integer                             :: k, kx, k1
         real, dimension(:), allocatable     :: ph_unstaggered
@@ -56,27 +56,27 @@ contains
 
         ph_unstaggered = (ph(1:kx-1) + ph(2:kx)) / 2.
 
-        ! Find closest vertical level below 'height'
+        ! Find closest vertical level below 'height_msl'
         do k = 1, kx-1
-            if (ph_unstaggered(k) < height) then
+            if (ph_unstaggered(k) < height_msl) then
                 k1 = k
             end if
         end do
 
-        ! Linearly interpolate to find k at 'height'
+        ! Linearly interpolate to find k at 'height_msl'
         height_lower = ph_unstaggered(k1)
         height_upper = ph_unstaggered(k1+1)
 
-        if (height < height_lower) then
-            height_to_k = height - height_lower
-        else if (height > height_upper) then
+        if (height_msl < height_lower) then
+            height_to_k = height_msl - height_lower
+        else if (height_msl > height_upper) then
             height_to_k = 0
         else
-            alpha = (height - height_lower)/(height_upper - height_lower)
+            alpha = (height_msl - height_lower)/(height_upper - height_lower)
             height_to_k = k1 + alpha
         end if
 
-        ! write(*, *) height, height_lower, height_upper, k1, height_to_k
+        ! write(*, *) height_msl, height_lower, height_upper, k1, height_to_k
 
         return
 
@@ -114,16 +114,15 @@ contains
         integer                                     :: ierr
         integer                                     :: nlines
 
-        character (len=80)                          :: tower_name, tower_type
-        real                                        :: lat, lon, height, &
-                                                       elev, co2
-        integer                                     :: iwrf, jwrf, kwrf
+        character (len=80)                          :: tower_name
+        real                                        :: lat, lon, height_msl, co2
 
         real                                        :: aio, ajo, ako
         integer                                     :: io, jo, ko
 
-        input_file = 'tower_' // times(1:4) // times(6:7) // times(9:10) // &
-                     times(12:13) // times(15:16) // times(18:19) // ".dat"
+        input_file = 'tower_co2_' // times(1:4) // times(6:7) // &
+                     times(9:10) // "_" // times(12:13) // times(15:16) // &
+                     times(18:19) // ".dat"
         open(10, file=trim(input_file), status='old', form='formatted', &
              iostat=ierr)
         if (ierr /= 0) then
@@ -153,7 +152,7 @@ contains
         allocate(raw%co2_tower%tower_name(raw%co2_tower%num))
         allocate(raw%co2_tower%latitude(raw%co2_tower%num))
         allocate(raw%co2_tower%longitude(raw%co2_tower%num))
-        allocate(raw%co2_tower%elevation(raw%co2_tower%num))
+        allocate(raw%co2_tower%height_msl(raw%co2_tower%num))
         allocate(raw%co2_tower%co2(raw%co2_tower%num))
         allocate(raw%co2_tower%ii(raw%co2_tower%num))
         allocate(raw%co2_tower%jj(raw%co2_tower%num))
@@ -161,26 +160,19 @@ contains
 
         rewind(10)
         do n = 1, raw%co2_tower%num
-            read(10, '(a11, a20, f10.4, f10.4, f7.1, f7.1, i4, i4, i3, f9.4)', &
-                 iostat=ierr) tower_name, tower_type, lat, lon, height, elev, jwrf, iwrf, kwrf, co2
+            read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
+                 iostat=ierr) tower_name, lat, lon, height_msl, co2
 
             raw%co2_tower%tower_name(n) = tower_name
             raw%co2_tower%latitude(n) = lat
             raw%co2_tower%longitude(n) = lon
-            raw%co2_tower%elevation(n) = elev
+            raw%co2_tower%height_msl(n) = height_msl
             raw%co2_tower%co2(n) = co2
-
-            ! Convert from 0-based indexing to 1-based indexing
-            iwrf = iwrf + 1
-            jwrf = jwrf + 1
-            kwrf = kwrf + 1
 
             call latlon_to_ij(proj, lat, lon, aio, ajo)
             io = nint(aio)
             jo = nint(ajo)
-
-            ako = height_to_k(ph(io,jo,:), elev)
-            ko = nint(ako)
+            ako = height_to_k(ph(io,jo,:), height_msl)
 
             raw%co2_tower%ii(n) = aio
             raw%co2_tower%jj(n) = ajo
@@ -188,12 +180,9 @@ contains
 
             ! Diagnostics
             ! write(*, *) trim(tower_name)
-            ! write(*, *) io, iwrf
-            ! write(*, *) jo, jwrf
-            ! write(*, *) ko, kwrf
             ! write(*, *) lat
             ! write(*, *) lon
-            ! write(*, *) elev
+            ! write(*, *) height_msl
             ! write(*, *) co2
 
         end do
@@ -410,7 +399,7 @@ contains
         integer                                     :: ierr
         integer                                     :: nlines
 
-        real                                        :: lat, lon, height, co2
+        real                                        :: lat, lon, height_msl, co2
 
         real                                        :: aio, ajo, ako
         integer                                     :: io, jo, ko
@@ -446,7 +435,7 @@ contains
 
         allocate(raw%co2_airborne%latitude(raw%co2_airborne%num))
         allocate(raw%co2_airborne%longitude(raw%co2_airborne%num))
-        allocate(raw%co2_airborne%height(raw%co2_airborne%num))
+        allocate(raw%co2_airborne%height_msl(raw%co2_airborne%num))
         allocate(raw%co2_airborne%co2(raw%co2_airborne%num))
         allocate(raw%co2_airborne%ii(raw%co2_airborne%num))
         allocate(raw%co2_airborne%jj(raw%co2_airborne%num))
@@ -455,18 +444,17 @@ contains
         rewind(10)
         do n = 1, raw%co2_airborne%num
             read(10, '(f9.4, f10.4, f8.1, f9.4)', iostat=ierr) &
-                lat, lon, height, co2
+                lat, lon, height_msl, co2
 
             raw%co2_airborne%latitude(n) = lat
             raw%co2_airborne%longitude(n) = lon
-            raw%co2_airborne%height(n) = height
+            raw%co2_airborne%height_msl(n) = height_msl
             raw%co2_airborne%co2(n) = co2
 
             call latlon_to_ij(proj, lat, lon, aio, ajo)
             io = nint(aio)
             jo = nint(ajo)
-
-            ako = height_to_k(ph(io,jo,:), height)
+            ako = height_to_k(ph(io,jo,:), height_msl)
 
             raw%co2_airborne%ii(n) = aio
             raw%co2_airborne%jj(n) = ajo

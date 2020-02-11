@@ -313,14 +313,14 @@ module obs_define
    type co2_tower_type
         integer                                    :: num
         character(len=5), allocatable,dimension(:) :: tower_name
-        real, allocatable,dimension(:)             :: latitude, longitude, elevation
+        real, allocatable,dimension(:)             :: latitude, longitude, height_msl
         real, allocatable,dimension(:)             :: ii, jj, kk
         real, allocatable,dimension(:)             :: co2
    end type co2_tower_type
 
    type co2_airborne_type
         integer                                    :: num
-        real, allocatable,dimension(:)             :: latitude, longitude, height
+        real, allocatable,dimension(:)             :: latitude, longitude, height_msl
         real, allocatable,dimension(:)             :: ii, jj, kk
         real, allocatable,dimension(:)             :: co2
    end type co2_airborne_type
