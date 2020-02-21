@@ -179,6 +179,7 @@ module namelist_define
 
 !-- co2_inversion
    integer       :: hroi_scaling_factors  ! horizontal radius of influence for CO2 scaling factors
+   integer       :: time_window_length    ! number of past cycles to include in inversion time window
 
 !-- Namelist contents :
 
@@ -205,7 +206,7 @@ module namelist_define
                               co2_error_tower, relax_scaling_factors_tower, relax_co2_tower
    namelist /co2_airborne_obs  / use_co2_airborne, datathin_co2_airborne, hroi_co2_airborne, vroi_co2_airborne, &
                                  co2_error_airborne, relax_scaling_factors_airborne, relax_co2_airborne
-   namelist /co2_inversion  / hroi_scaling_factors
+   namelist /co2_inversion  / hroi_scaling_factors, time_window_length
 
 
 end module namelist_define
@@ -312,6 +313,8 @@ module obs_define
 
    type co2_tower_type
         integer                                    :: num
+        integer, allocatable,dimension(:)          :: nlines
+        integer, allocatable,dimension(:)          :: icycle
         character(len=5), allocatable,dimension(:) :: tower_name
         real, allocatable,dimension(:)             :: latitude, longitude, height_msl
         real, allocatable,dimension(:)             :: ii, jj, kk

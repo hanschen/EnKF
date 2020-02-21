@@ -140,6 +140,7 @@ integer   :: sist,sied,sjst,sjed, sistart,siend,sjstart,sjend,sis,sie,sjs,sje
 real      :: gaussdev, error, xb
 integer, dimension(8)  :: values
 character (len=10) :: filename, date, time, zone, varname
+character (len=4) :: cycle_num
 character (len=20) :: format1
 double precision :: timer,t0,t1,t2,t3,t4,t5
 integer :: grid_id, fid, rcode, num_update_var, assimilated_obs_num, update_flag
@@ -259,7 +260,7 @@ do iob=1,obs%num
          call xb_to_rv(filename,proj,tmp,ix,jx,kx,nv,iob,xlong,znw,xb,0) 
       else if ( obstype(1:1) == 'P' .or. obstype(1:1) == 'H'  ) then
          call xb_to_sounding(filename,proj,tmp,ix,jx,kx,nv,iob,xlong,znu,znw,p_top,xb,1,0)
-      else if ( obstype(1:5) == 'ideal'  .or. trim(obstype) == 'co2tower' .or. trim(obstype) == 'co2air' )then
+      else if ( obstype(1:5) == 'ideal'  .or. obstype(1:5) == 'co2t_' .or. obstype(1:5) == 'co2a_' )then
          obs%position(iob,3)=obs%position(iob,3)
       else 
          obs%position(iob,3) = 1.
@@ -317,9 +318,10 @@ obs_cycle: do ig=1,ceiling(real(obs%num)/nob)
          call xb_to_pw(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,znu,znw,yasend(iob,ie))
        else if ( obstype(1:5) == 'ideal' ) then
          call xb_to_idealsound(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
-       else if ( trim(obstype) == 'co2tower' ) then
-         call xb_to_co2_tower(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
-       else if ( trim(obstype) == 'co2air' ) then
+       else if ( obstype(1:5) == 'co2t_' ) then
+         cycle_num = obstype(6:9)
+         call xb_to_co2_tower(filename,xob(:,:,:,:,n,sid+1),cycle_num,ix,jx,kx,nv,iob,yasend(iob,ie))
+       else if ( obstype(1:5) == 'co2a_' ) then
          call xb_to_co2_airborne(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
        endif
      endif
@@ -382,7 +384,7 @@ obs_assimilate_cycle : do it = 1,obs%num
    end if
    if( abs(y_hxm)>(error*5.) .and. &
        .not.(obstype=='min_slp   ' .or. obstype=='longtitude' .or. obstype=='latitude  ') .and. &
-       (trim(obstype) /= 'co2tower') .and. trim(obstype) /= 'co2air' ) then
+       (obstype(1:5) /= 'co2t_') .and. obstype(1:5) /= 'co2a_' ) then
       if ( my_proc_id==0 ) write(*,*)' ...kicked off for large error'
       kick_flag(iob)=1
       cycle obs_assimilate_cycle
@@ -581,16 +583,16 @@ t0=MPI_Wtime()
    do i = uist,uied
      call corr(real(i-obs%position(iob,1)),real(j-obs%position(iob,2)),real(k-obs%position(iob,3)),var_ngx,var_ngz,corr_coef)
      if ( obstype == 'longtitude' .or. obstype == 'latitude  ' ) corr_coef = 1.0
-     if (varname(1:3) == 'CO2_SF') then
-         if ( trim(obstype) == 'co2tower' ) then
+     if (varname(1:6) == 'CO2_SF') then
+         if ( obstype(1:5) == 'co2t_' ) then
              corr_coef = (1 - relax_scaling_factors_tower)*corr_coef
-         else if ( trim(obstype) == 'co2air' ) then
+         else if ( obstype(1:5) == 'co2a_' ) then
              corr_coef = (1 - relax_scaling_factors_airborne)*corr_coef
          end if
      else if (varname(1:3) == 'CO2') then
-         if ( trim(obstype) == 'co2tower' ) then
+         if ( obstype(1:5) == 'co2t_' ) then
              corr_coef = (1 - relax_co2_tower)*corr_coef
-         else if ( trim(obstype) == 'co2air' ) then
+         else if ( obstype(1:5) == 'co2a_' ) then
              corr_coef = (1 - relax_co2_airborne)*corr_coef
          end if
      end if

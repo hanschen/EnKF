@@ -165,6 +165,7 @@ subroutine  read_namelist(ix, jx, kx)
    relax_co2_airborne    = 0.
 
 !-- co2_inversion
+   time_window_length = 0
    hroi_scaling_factors = 999
    
 !------------------------------------------------------------------------

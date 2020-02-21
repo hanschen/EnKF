@@ -85,7 +85,7 @@ endif
 
 ! CO2 tower data
 if ( use_co2_tower ) then
-    call get_co2_tower_obs ( times, ph, proj )
+    call get_co2_tower_obs ( ix, jx, kx, proj )
 endif
 
 ! CO2 airborne data

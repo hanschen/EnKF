@@ -89,66 +89,92 @@ contains
     !
     ! Parameters
     ! ----------
-    ! times:
-    !   Time of the observation formatted as %Y-%m-%d_%H:%M:%S, e.g.
-    !   2017-05_03_10:38:00.
-    ! ph:
-    !   Unstaggered model geopotential heights.
+    ! ix:
+    !   x (longitude) dimension size.
+    ! jx:
+    !   y (latitude) dimension size.
+    ! kx:
+    !   z (vertical) dimension size.
     ! proj:
     !   Model projection (of type proj_info).
     !
     ! Input files
     ! -----------
-    ! tower_%Y%m%d%H%M%S.dat (e.g. tower_20170503103800.dat)
+    ! co2_tower_{cycle}.dat (e.g. co2_tower_0000.dat)
     !
     !--------------------------------------------------------------------------
-    subroutine get_co2_tower_obs(times, ph, proj)
+    subroutine get_co2_tower_obs(ix, jx, kx, proj)
         implicit none
 
-        character(len=80), intent(in)               :: times
-        real, dimension(:,:,:), intent(in)          :: ph
+        integer, intent(in)                         :: ix, jx, kx
         type(proj_info), intent(in)                 :: proj
 
-        integer                                     :: n
+        character (len=80)                          :: wrf_file
+        real, dimension(ix,jx,kx+1)                 :: ph, phb
+        integer                                     :: icycle
+        character (len=4)                           :: cycle_num
+        character(len=80)                           :: times
+        integer                                     :: n, nn
         character (len=80)                          :: input_file
         integer                                     :: ierr
-        integer                                     :: nlines
+        integer                                     :: nlines, nlines_total
 
         character (len=80)                          :: tower_name
         real                                        :: lat, lon, height_msl, co2
 
         real                                        :: aio, ajo, ako
         integer                                     :: io, jo, ko
+        integer                                     :: time_window
 
-        input_file = 'tower_co2_' // times(1:4) // times(6:7) // &
-                     times(9:10) // "_" // times(12:13) // times(15:16) // &
-                     times(18:19) // ".dat"
-        open(10, file=trim(input_file), status='old', form='formatted', &
-             iostat=ierr)
-        if (ierr /= 0) then
-            if (my_proc_id == 0) then
-                write(*, *) trim(input_file), ' does not exist.'
-                write(*, *) 'Tower CO2 concentration data will not be &
-                            &assimilated!'
-            end if
+        time_window = time_window_length
+        if (time_window == 0) then
+            ! include current time if time_window_length is 0
+            time_window = 1
         end if
 
-        if (my_proc_id == 0) then
-            write(*, *) ''
-            write(*, *) '---------------------------------------------------'
-            write(*, *) '.... Getting tower CO2 data ....'
-        end if
+        allocate(raw%co2_tower%nlines(0:time_window-1))
 
-        nlines = 0
-        do
-            read(10, *, iostat=ierr)
+        nlines_total = 0
+        do icycle = 0, time_window-1
+            write(cycle_num, '(i4.4)') icycle
+            input_file = 'co2_tower_' // cycle_num // ".dat"
+
+            open(10, file=trim(input_file), status='old', form='formatted', &
+                 iostat=ierr)
+
             if (ierr /= 0) then
-                exit
+                if (my_proc_id == 0) then
+                    write(*, *) trim(input_file), ' does not exist.'
+                    ! TODO: Fix error message
+                    write(*, *) 'Tower CO2 concentration data will not be &
+                                &assimilated!'
+                end if
             end if
-            nlines = nlines + 1
-        end do
-        raw%co2_tower%num = nlines
 
+            if (my_proc_id == 0) then
+                write(*, *) ''
+                write(*, *) '---------------------------------------------------'
+                write(*, *) '.... Getting tower CO2 data ....'
+            end if
+
+            nlines = 0
+            do
+                read(10, *, iostat=ierr)
+                if (ierr /= 0) then
+                    exit
+                end if
+                nlines = nlines + 1
+            end do
+
+            raw%co2_tower%nlines(icycle) = nlines
+            nlines_total = nlines_total + nlines
+
+            close(10)
+        end do
+
+        raw%co2_tower%num = nlines_total
+
+        allocate(raw%co2_tower%icycle(raw%co2_tower%num))
         allocate(raw%co2_tower%tower_name(raw%co2_tower%num))
         allocate(raw%co2_tower%latitude(raw%co2_tower%num))
         allocate(raw%co2_tower%longitude(raw%co2_tower%num))
@@ -158,35 +184,54 @@ contains
         allocate(raw%co2_tower%jj(raw%co2_tower%num))
         allocate(raw%co2_tower%kk(raw%co2_tower%num))
 
-        rewind(10)
-        do n = 1, raw%co2_tower%num
-            read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
-                 iostat=ierr) tower_name, lat, lon, height_msl, co2
+        nn = 1
 
-            raw%co2_tower%tower_name(n) = tower_name
-            raw%co2_tower%latitude(n) = lat
-            raw%co2_tower%longitude(n) = lon
-            raw%co2_tower%height_msl(n) = height_msl
-            raw%co2_tower%co2(n) = co2
+        do icycle = 0, time_window-1
+            write(cycle_num, '(i4.4)') icycle
+            input_file = 'co2_tower_' // cycle_num // ".dat"
 
-            call latlon_to_ij(proj, lat, lon, aio, ajo)
-            io = nint(aio)
-            jo = nint(ajo)
-            ako = height_to_k(ph(io,jo,:), height_msl)
+            ! hard-coded, may want to make more general later
+            wrf_file = 'wrfinput_d01_input_' // cycle_num
+            call get_variable3d(trim(wrf_file), 'PH        ', &
+                                ix, jx, kx+1, 1, ph )
+            call get_variable3d(trim(wrf_file), 'PHB       ', &
+                                ix, jx, kx+1, 1, phb)
+            ph = (ph + phb)/9.8
 
-            raw%co2_tower%ii(n) = aio
-            raw%co2_tower%jj(n) = ajo
-            raw%co2_tower%kk(n) = ako
+            open(10, file=trim(input_file), status='old', form='formatted', &
+                 iostat=ierr)
 
-            ! Diagnostics
-            ! write(*, *) trim(tower_name)
-            ! write(*, *) lat
-            ! write(*, *) lon
-            ! write(*, *) height_msl
-            ! write(*, *) co2
+            do n = 1, raw%co2_tower%nlines(icycle)
+                read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
+                     iostat=ierr) tower_name, lat, lon, height_msl, co2
 
+                raw%co2_tower%icycle(nn) = icycle
+                raw%co2_tower%tower_name(nn) = tower_name
+                raw%co2_tower%latitude(nn) = lat
+                raw%co2_tower%longitude(nn) = lon
+                raw%co2_tower%height_msl(nn) = height_msl
+                raw%co2_tower%co2(nn) = co2
+
+                call latlon_to_ij(proj, lat, lon, aio, ajo)
+                io = nint(aio)
+                jo = nint(ajo)
+                ako = height_to_k(ph(io,jo,:), height_msl)
+
+                raw%co2_tower%ii(nn) = aio
+                raw%co2_tower%jj(nn) = ajo
+                raw%co2_tower%kk(nn) = ako
+
+                ! Diagnostics
+                ! write(*, *) trim(tower_name)
+                ! write(*, *) lat
+                ! write(*, *) lon
+                ! write(*, *) height_msl
+                ! write(*, *) co2
+
+                nn = nn + 1
+            end do
+            close(10)
         end do
-        close(10)
 
         return
 
@@ -219,10 +264,13 @@ contains
         integer, intent(in)                  :: ix, jx
         integer, intent(in)                  :: datathin, hroi, vroi
 
+        character (len=4)                    :: cycle_num
         real                                 :: ii, jj, kk
         integer                              :: n
 
         do n = 1, raw%co2_tower%num
+            write(cycle_num, '(i4.4)') raw%co2_tower%icycle(n)
+
             ii = raw%co2_tower%ii(n)
             jj = raw%co2_tower%jj(n)
             kk = raw%co2_tower%kk(n)
@@ -266,7 +314,7 @@ contains
             if (raw%co2_tower%co2(n) > 0) then
                 obs%num                 = obs%num + 1
                 obs%dat     (obs%num  ) = raw%co2_tower%co2(n)
-                obs%type    (obs%num  ) = 'co2tower  '
+                obs%type    (obs%num  ) = 'co2t_' // cycle_num
                 obs%err     (obs%num  ) = co2_error_tower
                 obs%position(obs%num,1) = ii
                 obs%position(obs%num,2) = jj
@@ -292,10 +340,12 @@ contains
     ! Parameters
     ! ----------
     ! inputfile:
-    !   Path to wrfout file with the background. Used only if 'CO2' is not
-    !   a state variable.
+    !   Path to wrfout file with the background. Used only if 'CO2_{cycle}' is
+    !   not a state variable.
     ! xb:
     !   State vector (background or prior).
+    ! cycle_num:
+    !   Cycle number as a string, e.g. '0000'.
     ! ix:
     !   x (longitude) dimension size.
     ! jx:
@@ -313,14 +363,16 @@ contains
     !   h(xb) for the current observation.
     !
     !--------------------------------------------------------------------------
-    subroutine xb_to_co2_tower(inputfile, xb, ix, jx, kx, nv, iob, hxb)
+    subroutine xb_to_co2_tower(inputfile, xb, cycle_num, ix, jx, kx, nv, iob, hxb)
         implicit none
         character(len=10), intent(in)           :: inputfile
         character(len=10)                       :: obstype
+        character(len=4)                        :: cycle_num
         integer, intent(in)                     :: ix, jx, kx, nv, iob
         real, dimension(3,3,kx+1,nv), intent(in) :: xb
         real, intent(out)                       :: hxb
 
+        character(len=8)                        :: varname
         real, dimension(ix,jx,kx)               :: co2
         real, dimension(kx)                     :: co2_vert
         integer                                 :: m
@@ -345,8 +397,10 @@ contains
         dym = real(j1+1) - obs_jj
         dzm = real(k1+1) - obs_kk
 
+        varname = 'CO2_' // cycle_num
+
         do m = 1, nv
-            if (trim(enkfvar(m)) == 'CO2') then
+            if (trim(enkfvar(m)) == varname) then
                 i_co2 = m
             end if
         end do
@@ -354,7 +408,7 @@ contains
         if (i_co2 > 0) then
             co2(i1:i1+1,j1:j1+1,1:kx) = xb(1:2,1:2,1:kx,i_co2)
         else
-            call get_variable3d(inputfile, 'CO2', ix, jx, kx, 1, co2)
+            call get_variable3d(inputfile, varname, ix, jx, kx, 1, co2)
         end if
 
        co2_vert(:) = dym*(dx*co2(i1+1,j1,:) + dxm*co2(i1,j1,:)) + &
@@ -538,7 +592,7 @@ contains
             if (raw%co2_airborne%co2(n) > 0) then
                 obs%num                 = obs%num + 1
                 obs%dat     (obs%num  ) = raw%co2_airborne%co2(n)
-                obs%type    (obs%num  ) = 'co2air  '
+                obs%type    (obs%num  ) = 'co2a_   '
                 obs%err     (obs%num  ) = co2_error_airborne
                 obs%position(obs%num,1) = ii
                 obs%position(obs%num,2) = jj
