@@ -152,7 +152,7 @@ subroutine  read_namelist(ix, jx, kx)
    hroi_co2_tower     = 999
    vroi_co2_tower     = 999
    co2_error_tower    = 1.
-   relax_scaling_factors_tower = 0.
+   relax_sf_tower     = 0.
    relax_co2_tower    = 0.
 
 !-- use_co2_airborne
@@ -161,7 +161,7 @@ subroutine  read_namelist(ix, jx, kx)
    hroi_co2_airborne     = 999
    vroi_co2_airborne     = 999
    co2_error_airborne    = 1.
-   relax_scaling_factors_airborne = 0.
+   relax_sf_airborne     = 0.
    relax_co2_airborne    = 0.
 
 !-- co2_inversion

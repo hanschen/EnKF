@@ -585,9 +585,9 @@ t0=MPI_Wtime()
      if ( obstype == 'longtitude' .or. obstype == 'latitude  ' ) corr_coef = 1.0
      if (varname(1:6) == 'CO2_SF') then
          if ( obstype(1:5) == 'co2t_' ) then
-             corr_coef = (1 - relax_scaling_factors_tower)*corr_coef
+             corr_coef = (1 - relax_sf_tower)*corr_coef
          else if ( obstype(1:5) == 'co2a_' ) then
-             corr_coef = (1 - relax_scaling_factors_airborne)*corr_coef
+             corr_coef = (1 - relax_sf_airborne)*corr_coef
          end if
      else if (varname(1:3) == 'CO2') then
          if ( obstype(1:5) == 'co2t_' ) then

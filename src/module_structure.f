@@ -163,7 +163,7 @@ module namelist_define
    integer       :: hroi_co2_tower      ! horizontal radius of influence for CO2 tower
    integer       :: vroi_co2_tower      ! vertical radius of influence for CO2 tower
    real          :: co2_error_tower     ! error of CO2 tower obs (ppm)
-   real          :: relax_scaling_factors_tower ! fraction to relax xa to xb for scaling factors for CO2 tower obs
+   real          :: relax_sf_tower      ! fraction to relax xa to xb for scaling factors for CO2 tower obs
    real          :: relax_co2_tower     ! fraction to relax xa to xb for CO2 for CO2 tower obs
 
 !-- use_co2_airborne
@@ -174,7 +174,7 @@ module namelist_define
    integer       :: hroi_co2_airborne      ! horizontal radius of influence for CO2 airborne obs
    integer       :: vroi_co2_airborne      ! vertical radius of influence for CO2 airborne obs
    real          :: co2_error_airborne     ! error of CO2 airborne obs (ppm)
-   real          :: relax_scaling_factors_airborne ! fraction to relax xa to xb for scaling factors for CO2 airborne obs
+   real          :: relax_sf_airborne      ! fraction to relax xa to xb for scaling factors for CO2 airborne obs
    real          :: relax_co2_airborne     ! fraction to relax xa to xb for CO2 for CO2 airborne obs
 
 !-- co2_inversion
@@ -203,9 +203,9 @@ module namelist_define
    namelist /radar_obs      / radar_number, use_radar_rf, use_radar_rv, datathin_radar, hroi_radar, vroi_radar
    namelist /airborne_radar / use_airborne_rf, use_airborne_rv, datathin_airborne, hroi_airborne, vroi_airborne
    namelist /co2_tower_obs  / use_co2_tower, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower, &
-                              co2_error_tower, relax_scaling_factors_tower, relax_co2_tower
+                              co2_error_tower, relax_sf_tower, relax_co2_tower
    namelist /co2_airborne_obs  / use_co2_airborne, datathin_co2_airborne, hroi_co2_airborne, vroi_co2_airborne, &
-                                 co2_error_airborne, relax_scaling_factors_airborne, relax_co2_airborne
+                                 co2_error_airborne, relax_sf_airborne, relax_co2_airborne
    namelist /co2_inversion  / hroi_scaling_factors, time_window_length
 
 
