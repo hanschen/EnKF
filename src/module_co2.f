@@ -113,7 +113,6 @@ contains
         real, dimension(ix,jx,kx+1)                 :: ph, phb
         integer                                     :: icycle
         character (len=4)                           :: cycle_num
-        character(len=80)                           :: times
         integer                                     :: n, nn
         character (len=80)                          :: input_file
         integer                                     :: ierr
@@ -368,7 +367,6 @@ contains
     subroutine xb_to_co2_tower(inputfile, xb, cycle_num, ix, jx, kx, nv, iob, hxb)
         implicit none
         character(len=10), intent(in)           :: inputfile
-        character(len=10)                       :: obstype
         character(len=4)                        :: cycle_num
         integer, intent(in)                     :: ix, jx, kx, nv, iob
         real, dimension(3,3,kx+1,nv), intent(in) :: xb
@@ -383,7 +381,6 @@ contains
         integer                                 :: i1, j1, k1
         real                                    :: dx, dxm, dy, dym, dz, dzm
 
-        obstype = obs%type(iob)
         obs_ii = obs%position(iob,1)
         obs_jj = obs%position(iob,2)
         obs_kk = obs%position(iob,3)
@@ -644,7 +641,6 @@ contains
     subroutine xb_to_co2_airborne(inputfile, xb, ix, jx, kx, nv, iob, hxb)
         implicit none
         character(len=10), intent(in)           :: inputfile
-        character(len=10)                       :: obstype
         integer, intent(in)                     :: ix, jx, kx, nv, iob
         real, dimension(3,3,kx+1,nv), intent(in) :: xb
         real, intent(out)                       :: hxb
@@ -657,7 +653,6 @@ contains
         integer                                 :: i1, j1, k1
         real                                    :: dx, dxm, dy, dym, dz, dzm
 
-        obstype = obs%type(iob)
         obs_ii = obs%position(iob,1)
         obs_jj = obs%position(iob,2)
         obs_kk = obs%position(iob,3)
