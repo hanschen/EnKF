@@ -190,7 +190,9 @@ contains
             write(cycle_num, '(i4.4)') icycle
             input_file = 'co2_tower_' // cycle_num // ".dat"
 
-            ! hard-coded, may want to make more general later
+            ! Get staggered heights for each cycle time.
+            ! The wrfinput filename is currently hard-coded, we may want to
+            ! make more general later.
             wrf_file = 'wrfinput_d01_input_' // cycle_num
             call get_variable3d(trim(wrf_file), 'PH        ', &
                                 ix, jx, kx+1, 1, ph )
