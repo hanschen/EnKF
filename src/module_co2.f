@@ -789,7 +789,7 @@ contains
         integer                                     :: nlines, nlines_total
 
         character (len=80)                          :: satellite_name
-        real                                        :: lat, lon, xco2
+        real                                        :: lat, lon, height_msl, xco2
 
         real                                        :: aio, ajo, ako
         integer                                     :: io, jo, ko
@@ -861,8 +861,8 @@ contains
                  iostat=ierr)
 
             do n = 1, raw%xco2_satellite%nlines(icycle)
-                read(10, '(a20, f10.4, f10.4, f11.6)', &
-                     iostat=ierr) satellite_name, lat, lon, xco2
+                read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
+                     iostat=ierr) satellite_name, lat, lon, height_msl, xco2
 
                 raw%xco2_satellite%icycle(nn) = icycle
                 raw%xco2_satellite%satellite_name(nn) = satellite_name
