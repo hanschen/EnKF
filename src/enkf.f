@@ -323,6 +323,9 @@ obs_cycle: do ig=1,ceiling(real(obs%num)/nob)
          call xb_to_co2_tower(filename,xob(:,:,:,:,n,sid+1),cycle_num,ix,jx,kx,nv,iob,yasend(iob,ie))
        else if ( obstype(1:5) == 'co2a_' ) then
          call xb_to_co2_airborne(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
+       else if ( obstype(1:5) == 'xco2_' ) then
+         cycle_num = obstype(6:9)
+         call xb_to_xco2_satellite(filename,xob(:,:,:,:,n,sid+1),cycle_num,ix,jx,kx,nv,iob,yasend(iob,ie))
        endif
      endif
    enddo
@@ -384,7 +387,7 @@ obs_assimilate_cycle : do it = 1,obs%num
    end if
    if( abs(y_hxm)>(error*5.) .and. &
        .not.(obstype=='min_slp   ' .or. obstype=='longtitude' .or. obstype=='latitude  ') .and. &
-       (obstype(1:5) /= 'co2t_') .and. obstype(1:5) /= 'co2a_' ) then
+       (obstype(1:5) /= 'co2t_') .and. obstype(1:5) /= 'co2a_' .and. obstype(1:5) /= 'xco2_' ) then
       if ( my_proc_id==0 ) write(*,*)' ...kicked off for large error'
       kick_flag(iob)=1
       cycle obs_assimilate_cycle
@@ -588,12 +591,16 @@ t0=MPI_Wtime()
              corr_coef = (1 - relax_sf_tower)*corr_coef
          else if ( obstype(1:5) == 'co2a_' ) then
              corr_coef = (1 - relax_sf_airborne)*corr_coef
+         else if ( obstype(1:5) == 'xco2_' ) then
+             corr_coef = (1 - relax_sf_satellite)*corr_coef
          end if
      else if (varname(1:3) == 'CO2') then
          if ( obstype(1:5) == 'co2t_' ) then
              corr_coef = (1 - relax_co2_tower)*corr_coef
          else if ( obstype(1:5) == 'co2a_' ) then
              corr_coef = (1 - relax_co2_airborne)*corr_coef
+         else if ( obstype(1:5) == 'xco2_' ) then
+             corr_coef = (1 - relax_co2_satellite)*corr_coef
          end if
      end if
      km(i-uist+1,j-ujst+1,k-kst+1) = km(i-uist+1,j-ujst+1,k-kst+1) * corr_coef

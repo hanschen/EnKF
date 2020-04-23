@@ -83,6 +83,76 @@ contains
     end function height_to_k
 
     !--------------------------------------------------------------------------
+    ! calc_xco2
+    !
+    ! Calculate XCO2 for 2x2 gridpoints.
+    !
+    ! Parameters
+    ! ----------
+    ! inputfile:
+    !   Path to wrfout file with the CO2 values to calculate XCO2 from.
+    ! varname:
+    !   Name of CO2 variable.
+    ! i1:
+    !   Lower x (longitude) index.
+    ! j1:
+    !   Lower y (latitude) index.
+    ! kx:
+    !   z (vertical) dimension size.
+    !
+    ! Return
+    ! ------
+    ! calc_xco2
+    !   Calculated XCO2 values.
+    !
+    !--------------------------------------------------------------------------
+    function calc_xco2(inputfile, varname, i1, j1, kx)
+        implicit none
+        real, dimension(2,2)                    :: calc_xco2
+        character(len=10), intent(in)           :: inputfile
+        character(len=8), intent(in)            :: varname
+        integer, intent(in)                     :: i1, j1, kx
+
+        integer                               :: fid, i, j
+        real, dimension(2,2,kx)               :: co2, p, pb, qvapor
+        real, dimension(2,2,kx)               :: pressure, q, dp, pw
+        real, dimension(2,2,kx-1)             :: pressure_w
+        real                                  :: p_top, psfc
+
+        call get_variable0d(inputfile, 'P_TOP     ', 1, p_top)
+        call get_variable0d(inputfile, 'PSFC      ', 1, psfc)
+
+        call open_file(inputfile, nf_nowrite, fid)
+        call get_variable3d_local(fid, varname, &
+                                  i1, i1+1, j1, j1+1, 1, kx, 1, co2)
+        call get_variable3d_local(fid, 'P         ', &
+                                  i1, i1+1, j1, j1+1, 1, kx, 1, p)
+        call get_variable3d_local(fid, 'PB        ', &
+                                  i1, i1+1, j1, j1+1, 1, kx, 1, pb)
+        call get_variable3d_local(fid, 'QVAPOR    ', &
+                                  i1, i1+1, j1, j1+1, 1, kx, 1, qvapor)
+        call close_file(fid)
+
+        pressure = p + pb
+        pressure_w = 0.5*(pressure(:,:,1:kx-1) + pressure(:,:,2:kx))
+
+        dp(:,:,1) = pressure_w(:,:,1) - psfc
+        dp(:,:,2:kx-1) = pressure_w(:,:,2:kx-1) - pressure(:,:,1:kx-2)
+        dp(:,:,kx) = p_top - pressure_w(:,:,kx-1)
+
+        pw = (1 - q)*dp
+
+        do j = 1, 2
+            do i = 1, 2
+                calc_xco2(i,j) = sum(pw(i,j,:) * co2(i,j,:)) / sum(pw(i,j,:))
+            end do
+        end do
+
+        return
+
+    end function calc_xco2
+
+    !--------------------------------------------------------------------------
     ! get_co2_tower_obs
     !
     ! Read CO2 tower files for the current time into raw%co2_tower variables.
@@ -688,5 +758,275 @@ contains
         return
 
     end subroutine xb_to_co2_airborne
+
+    !--------------------------------------------------------------------------
+    ! get_xco2_satellite_obs
+    !
+    ! Read XCO2 satellite files for the current time into raw%xco2_satellite
+    ! variables.
+    !
+    ! Parameters
+    ! ----------
+    ! proj:
+    !   Model projection (of type proj_info).
+    !
+    ! Input files
+    ! -----------
+    ! xco2_satellite_{cycle}.dat (e.g. xco2_satellite_0000.dat)
+    !
+    !--------------------------------------------------------------------------
+    subroutine get_xco2_satellite_obs(proj)
+        implicit none
+
+        type(proj_info), intent(in)                 :: proj
+
+        integer                                     :: icycle
+        character (len=4)                           :: cycle_num
+        character(len=80)                           :: times
+        integer                                     :: n, nn
+        character (len=80)                          :: input_file
+        integer                                     :: ierr
+        integer                                     :: nlines, nlines_total
+
+        character (len=80)                          :: satellite_name
+        real                                        :: lat, lon, xco2
+
+        real                                        :: aio, ajo, ako
+        integer                                     :: io, jo, ko
+        integer                                     :: time_window
+
+        time_window = time_window_length
+        if (time_window == 0) then
+            ! include current time if time_window_length is 0
+            time_window = 1
+        end if
+
+        allocate(raw%xco2_satellite%nlines(0:time_window-1))
+
+        nlines_total = 0
+        do icycle = 0, time_window-1
+            write(cycle_num, '(i4.4)') icycle
+            input_file = 'xco2_satellite_' // cycle_num // ".dat"
+
+            open(10, file=trim(input_file), status='old', form='formatted', &
+                 iostat=ierr)
+
+            if (ierr /= 0) then
+                if (my_proc_id == 0) then
+                    write(*, *) trim(input_file), ' does not exist.'
+                    ! TODO: Fix error message
+                    write(*, *) 'Satellite CO2 concentration data will not be &
+                                &assimilated!'
+                end if
+            end if
+
+            if (my_proc_id == 0) then
+                write(*, *) ''
+                write(*, *) '---------------------------------------------------'
+                write(*, *) '.... Getting Satellite XCO2 data ....'
+            end if
+
+            nlines = 0
+            do
+                read(10, *, iostat=ierr)
+                if (ierr /= 0) then
+                    exit
+                end if
+                nlines = nlines + 1
+            end do
+
+            raw%xco2_satellite%nlines(icycle) = nlines
+            nlines_total = nlines_total + nlines
+
+            close(10)
+        end do
+
+        raw%xco2_satellite%num = nlines_total
+
+        allocate(raw%xco2_satellite%icycle(raw%xco2_satellite%num))
+        allocate(raw%xco2_satellite%satellite_name(raw%xco2_satellite%num))
+        allocate(raw%xco2_satellite%latitude(raw%xco2_satellite%num))
+        allocate(raw%xco2_satellite%longitude(raw%xco2_satellite%num))
+        allocate(raw%xco2_satellite%xco2(raw%xco2_satellite%num))
+        allocate(raw%xco2_satellite%ii(raw%xco2_satellite%num))
+        allocate(raw%xco2_satellite%jj(raw%xco2_satellite%num))
+
+        nn = 1
+
+        do icycle = 0, time_window-1
+            write(cycle_num, '(i4.4)') icycle
+            input_file = 'xco2_satellite_' // cycle_num // ".dat"
+
+            open(10, file=trim(input_file), status='old', form='formatted', &
+                 iostat=ierr)
+
+            do n = 1, raw%xco2_satellite%nlines(icycle)
+                read(10, '(a20, f10.4, f10.4, f11.6)', &
+                     iostat=ierr) satellite_name, lat, lon, xco2
+
+                raw%xco2_satellite%icycle(nn) = icycle
+                raw%xco2_satellite%satellite_name(nn) = satellite_name
+                raw%xco2_satellite%latitude(nn) = lat
+                raw%xco2_satellite%longitude(nn) = lon
+                raw%xco2_satellite%xco2(nn) = xco2
+
+                call latlon_to_ij(proj, lat, lon, aio, ajo)
+                io = nint(aio)
+                jo = nint(ajo)
+
+                raw%xco2_satellite%ii(nn) = aio
+                raw%xco2_satellite%jj(nn) = ajo
+
+                ! Diagnostics
+                ! write(*, *) trim(satellite_name)
+                ! write(*, *) lat
+                ! write(*, *) lon
+                ! write(*, *) co2
+
+                nn = nn + 1
+            end do
+            close(10)
+        end do
+
+        return
+
+    end subroutine get_xco2_satellite_obs
+
+    !--------------------------------------------------------------------------
+    ! sort_xco2_satellite_data
+    !
+    ! Prepare CO2 tower data to be assimilated.
+    !
+    ! Parameters
+    ! ----------
+    ! ix:
+    !   x (longitude) dimension size.
+    ! jx:
+    !   y (latitude) dimension size.
+    ! datathin:
+    !   Ignore every ``datathin``th tower (NOT IMPLEMENTED).
+    !   For example, if ``datathin`` is 2, then every second tower is ignored.
+    ! hroi:
+    !   Horizontal radius of influence in gridpoints.
+    ! vroi:
+    !   Vertical radius of influence in gridpoints.
+    !
+    !--------------------------------------------------------------------------
+    subroutine sort_xco2_satellite_data(ix, jx, datathin, hroi, vroi)
+        implicit none
+
+        integer, intent(in)                  :: ix, jx
+        integer, intent(in)                  :: datathin, hroi, vroi
+
+        character (len=4)                    :: cycle_num
+        real                                 :: ii, jj, kk
+        integer                              :: n
+
+        do n = 1, raw%xco2_satellite%num
+            write(cycle_num, '(i4.4)') raw%xco2_satellite%icycle(n)
+
+            ii = raw%xco2_satellite%ii(n)
+            jj = raw%xco2_satellite%jj(n)
+
+            ! Check if the observation is within the domain
+            if ((ii < 1. .or. ii > real(ix)) .or. &
+                    (jj < 1. .or. jj > real(jx))) then
+                if (my_proc_id == 0) then
+                    write(*, *) 'Satellite retrieval is outside the ', &
+                                'domain, skipping observation'
+                end if
+
+                cycle
+            end if
+
+            if (raw%xco2_satellite%xco2(n) > 0) then
+                obs%num                 = obs%num + 1
+                obs%dat     (obs%num  ) = raw%xco2_satellite%xco2(n)
+                obs%type    (obs%num  ) = 'xco2_' // cycle_num
+                obs%err     (obs%num  ) = xco2_error_satellite
+                obs%position(obs%num,1) = ii
+                obs%position(obs%num,2) = jj
+                obs%position(obs%num,3) = 0
+                obs%roi     (obs%num,1) = hroi
+                obs%roi     (obs%num,2) = vroi
+            endif
+        end do
+
+        return
+
+    end subroutine sort_xco2_satellite_data
+
+    !--------------------------------------------------------------------------
+    ! xb_to_xco2_satellite
+    !
+    ! Translate background state vector to CO2 concentration value at satellite
+    ! retrieval locations.
+    !
+    ! The retrieval value is obtained through weighted averaging in the
+    ! vertical and horizontal linear interpolation.
+    !
+    ! Parameters
+    ! ----------
+    ! inputfile:
+    !   Path to wrfout file with the background. Used only if 'CO2_{cycle}' is
+    !   not a state variable.
+    ! xb:
+    !   State vector (background or prior).
+    ! cycle_num:
+    !   Cycle number as a string, e.g. '0000'.
+    ! ix:
+    !   x (longitude) dimension size.
+    ! jx:
+    !   y (latitude) dimension size.
+    ! kx:
+    !   z (vertical) dimension size.
+    ! nv:
+    !   Number of state variables.
+    ! iob:
+    !   Number of the current observation.
+    !
+    ! Returns
+    ! -------
+    ! hxb:
+    !   h(xb) for the current observation.
+    !
+    !--------------------------------------------------------------------------
+    subroutine xb_to_xco2_satellite(inputfile, xb, cycle_num, ix, jx, kx, nv, iob, hxb)
+        implicit none
+        character(len=10), intent(in)           :: inputfile
+        character(len=4)                        :: cycle_num
+        integer, intent(in)                     :: ix, jx, kx, nv, iob
+        real, dimension(3,3,kx+1,nv), intent(in) :: xb
+        real, intent(out)                       :: hxb
+
+        character(len=8)                        :: varname
+        real, dimension(ix,jx,kx)               :: co2
+        real, dimension(ix,jx)                  :: xco2
+        integer                                 :: m
+        real                                    :: obs_ii, obs_jj
+        integer                                 :: i1, j1, k1
+        real                                    :: dx, dxm, dy, dym, dz, dzm
+
+        obs_ii = obs%position(iob,1)
+        obs_jj = obs%position(iob,2)
+
+        i1 = int(obs_ii)
+        j1 = int(obs_jj)
+
+        dx = obs_ii - real(i1)
+        dy = obs_jj - real(j1)
+        dxm = real(i1+1) - obs_ii
+        dym = real(j1+1) - obs_jj
+
+        varname = 'CO2_' // cycle_num
+
+        xco2 = calc_xco2(inputfile, varname, i1, j1, kx)
+
+        hxb = dym*(dx*xco2(2,1) + dxm*xco2(1,1)) + &
+              dy*(dx*xco2(2,2) + dxm*xco2(1,2))
+
+        return
+
+    end subroutine xb_to_xco2_satellite
 
 end module co2

@@ -93,6 +93,11 @@ if ( use_co2_airborne ) then
     call get_co2_airborne_obs ( times, ph, proj )
 endif
 
+! XCO2 satellite data
+if ( use_xco2_satellite ) then
+    call get_xco2_satellite_obs ( proj )
+endif
+
 !  if ( use_radar_rv ) call output_simulated_rv ( "asimulated_rv" )
 !   if ( use_simulated ) call simulated_obser ( wrf_file, ix, jx, kx, proj )
 ! Add all obs type observations into obs%dat(num_rv)
@@ -148,6 +153,9 @@ if ( use_co2_tower ) iobs = iobs + raw%co2_tower%num
 
 !. calculate CO2 airborne records
 if ( use_co2_airborne ) iobs = iobs + raw%co2_airborne%num
+
+!. calculate XCO2 satellite records
+if ( use_xco2_satellite ) iobs = iobs + raw%xco2_satellite%num
 
 if(my_proc_id==0) write(*,*)iobs,' observation data will be loaded'
 
@@ -278,6 +286,11 @@ obs%num = 0               ! obs%num for all observation, not only Rv
 !....... CO2 concentration from airborne observations
    if ( use_co2_airborne ) then
       call sort_co2_airborne_data( ix, jx, datathin_co2_airborne, hroi_co2_airborne, vroi_co2_airborne )
+   endif
+
+!....... XCO2 concentration from satellite observations
+   if ( use_xco2_satellite ) then
+      call sort_xco2_satellite_data( ix, jx, datathin_xco2_satellite, hroi_xco2_satellite, vroi_xco2_satellite )
    endif
 
    if(my_proc_id==0) write(*,*)obs%num,' observation data will be assimilated'

@@ -164,6 +164,15 @@ subroutine  read_namelist(ix, jx, kx)
    relax_sf_airborne     = 0.
    relax_co2_airborne    = 0.
 
+!-- use_xco2_satellite
+   use_xco2_satellite      = .false.
+   datathin_xco2_satellite = 999
+   hroi_xco2_satellite     = 999
+   vroi_xco2_satellite     = 999
+   xco2_error_satellite    = 1.
+   relax_sf_satellite     = 0.
+   relax_co2_satellite    = 0.
+
 !-- co2_inversion
    time_window_length = 0
    hroi_scaling_factors = 999
@@ -272,6 +281,11 @@ subroutine  read_namelist(ix, jx, kx)
    if( iost .ne. 0 ) then
        write(*,*)'co2_airborne_obs, please check it.'
        ! stop 'read_namelist co2_airborne_obs'
+   endif
+   read ( unit = namelist_unit, nml = xco2_satellite_obs, iostat = iost )
+   if( iost .ne. 0 ) then
+       write(*,*)'xco2_satellite_obs, please check it.'
+       ! stop 'read_namelist xco2_satellite_obs'
    endif
    read ( unit = namelist_unit, nml = co2_inversion, iostat = iost )
    if( iost .ne. 0 ) then
@@ -423,6 +437,13 @@ subroutine  read_namelist(ix, jx, kx)
          write(6,'(a,i4   )') '       data thinning: ',datathin_co2_airborne
          write(6,'(a,2i4  )') '       ROI for horizonal and vertical is:', hroi_co2_airborne, vroi_co2_airborne
          write(6,'(a,f6.2 )') '       CO2 error in ppm is: ', co2_error_airborne
+      endif
+
+      if ( use_xco2_satellite ) then
+         write(6,'(a      )') ' ===== assimilate SATELLITE XCO2 CONCENTRATION ===== '
+         write(6,'(a,i4   )') '       data thinning: ',datathin_xco2_satellite
+         write(6,'(a,2i4  )') '       ROI for horizonal and vertical is:', hroi_xco2_satellite, vroi_xco2_satellite
+         write(6,'(a,f6.2 )') '       XCO2 error in ppm is: ', xco2_error_satellite
       endif
 
    endif

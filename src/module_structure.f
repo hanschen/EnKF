@@ -177,6 +177,18 @@ module namelist_define
    real          :: relax_sf_airborne      ! fraction to relax xa to xb for scaling factors for CO2 airborne obs
    real          :: relax_co2_airborne     ! fraction to relax xa to xb for CO2 for CO2 airborne obs
 
+!-- use_xco2_satellite
+   logical       :: use_xco2_satellite     ! .true. : assimilated XCO2 satellite data
+   integer       :: datathin_xco2_satellite! 0=all data, 2=1/2 data, 10=1/10 data
+                                           ! 2: get the 1st, 3rd, 5th ... data
+                                           !-2: get the 2nd, 4th, 6th ... data
+   integer       :: hroi_xco2_satellite    ! horizontal radius of influence for XCO2 satellite obs
+   integer       :: vroi_xco2_satellite    ! vertical radius of influence for XCO2 satellite obs
+                                           ! (currently not implemented)
+   real          :: xco2_error_satellite   ! error of XCO2 satellite obs (ppm)
+   real          :: relax_sf_satellite      ! fraction to relax xa to xb for scaling factors for XCO2 satellite obs
+   real          :: relax_co2_satellite     ! fraction to relax xa to xb for CO2 for XCO2 satellite obs
+
 !-- co2_inversion
    integer       :: hroi_scaling_factors  ! horizontal radius of influence for CO2 scaling factors
    integer       :: time_window_length    ! number of past cycles to include in inversion time window
@@ -206,6 +218,8 @@ module namelist_define
                               co2_error_tower, relax_sf_tower, relax_co2_tower
    namelist /co2_airborne_obs  / use_co2_airborne, datathin_co2_airborne, hroi_co2_airborne, vroi_co2_airborne, &
                                  co2_error_airborne, relax_sf_airborne, relax_co2_airborne
+   namelist /xco2_satellite_obs  / use_xco2_satellite, datathin_xco2_satellite, hroi_xco2_satellite, vroi_xco2_satellite, &
+                                 xco2_error_satellite, relax_sf_satellite, relax_co2_satellite
    namelist /co2_inversion  / hroi_scaling_factors, time_window_length
 
 
@@ -328,6 +342,16 @@ module obs_define
         real, allocatable,dimension(:)             :: co2
    end type co2_airborne_type
 
+   type xco2_satellite_type
+        integer                                    :: num
+        integer, allocatable,dimension(:)          :: nlines
+        integer, allocatable,dimension(:)          :: icycle
+        character(len=5), allocatable,dimension(:) :: satellite_name
+        real, allocatable,dimension(:)             :: latitude, longitude
+        real, allocatable,dimension(:)             :: ii, jj
+        real, allocatable,dimension(:)             :: xco2
+   end type xco2_satellite_type
+
    type raw_type
         integer                                  :: radar_stn_num
         type ( Radar_data_type ), allocatable,dimension( : )  :: radar
@@ -335,6 +359,7 @@ module obs_define
         type ( gts_data_type      )              :: gts
         type ( co2_tower_type     )              :: co2_tower
         type ( co2_airborne_type     )           :: co2_airborne
+        type ( xco2_satellite_type   )           :: xco2_satellite
    end type raw_type
 
    type obs_type
