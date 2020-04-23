@@ -51,13 +51,13 @@ contains
         real                                :: height_lower, height_upper
         real                                :: alpha
 
-        kx = size(ph)
-        allocate(ph_unstaggered(kx-1))
+        kx = size(ph) - 1
+        allocate(ph_unstaggered(kx))
 
-        ph_unstaggered = (ph(1:kx-1) + ph(2:kx)) / 2.
+        ph_unstaggered = (ph(1:kx) + ph(2:kx+1)) / 2.
 
         ! Find closest vertical level below 'height_msl'
-        do k = 1, kx-1
+        do k = 1, kx
             if (ph_unstaggered(k) < height_msl) then
                 k1 = k
             end if
