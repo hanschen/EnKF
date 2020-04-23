@@ -272,6 +272,15 @@ contains
             open(10, file=trim(input_file), status='old', form='formatted', &
                  iostat=ierr)
 
+            if (ierr /= 0) then
+                if (my_proc_id == 0) then
+                    write(*, *) trim(input_file), ' does not exist.'
+                    ! TODO: Fix error message
+                    write(*, *) 'Tower CO2 concentration data will not be &
+                                &assimilated!'
+                end if
+            end if
+
             do n = 1, raw%co2_tower%nlines(icycle)
                 read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
                      iostat=ierr) tower_name, lat, lon, height_msl, co2
@@ -859,6 +868,15 @@ contains
 
             open(10, file=trim(input_file), status='old', form='formatted', &
                  iostat=ierr)
+
+            if (ierr /= 0) then
+                if (my_proc_id == 0) then
+                    write(*, *) trim(input_file), ' does not exist.'
+                    ! TODO: Fix error message
+                    write(*, *) 'Satellite CO2 concentration data will not be &
+                                &assimilated!'
+                end if
+            end if
 
             do n = 1, raw%xco2_satellite%nlines(icycle)
                 read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
