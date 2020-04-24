@@ -964,7 +964,7 @@ contains
                 obs%err     (obs%num  ) = xco2_error_satellite
                 obs%position(obs%num,1) = ii
                 obs%position(obs%num,2) = jj
-                obs%position(obs%num,3) = 0
+                obs%position(obs%num,3) = 1.
                 obs%roi     (obs%num,1) = hroi
                 obs%roi     (obs%num,2) = vroi
             endif
