@@ -169,7 +169,7 @@ subroutine  read_namelist(ix, jx, kx)
    datathin_xco2_satellite = 999
    hroi_xco2_satellite     = 999
    vroi_xco2_satellite     = 999
-   xco2_error_satellite    = 1.
+   xco2_error_satellite    = 0.1
    relax_sf_satellite     = 0.
    relax_co2_satellite    = 0.
 
