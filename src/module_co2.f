@@ -114,15 +114,17 @@ contains
         integer, intent(in)                     :: i1, j1, kx
 
         integer                               :: fid, i, j
+        real, dimension(2,2)                  :: psfc
         real, dimension(2,2,kx)               :: co2, p, pb, qvapor
         real, dimension(2,2,kx)               :: pressure, q, dp, pw
         real, dimension(2,2,kx-1)             :: pressure_w
-        real                                  :: p_top, psfc
+        real                                  :: p_top
 
         call get_variable0d(inputfile, 'P_TOP     ', 1, p_top)
-        call get_variable0d(inputfile, 'PSFC      ', 1, psfc)
 
         call open_file(inputfile, nf_nowrite, fid)
+        call get_variable2d_local(fid, 'PSFC      ', &
+                                  i1, i1+1, j1, j1+1, 1, psfc)
         call get_variable3d_local(fid, varname, &
                                   i1, i1+1, j1, j1+1, 1, kx, 1, co2)
         call get_variable3d_local(fid, 'P         ', &
@@ -134,10 +136,16 @@ contains
         call close_file(fid)
 
         pressure = p + pb
+
+        ! Pressure at full (w) levels
         pressure_w = 0.5*(pressure(:,:,1:kx-1) + pressure(:,:,2:kx))
 
-        dp(:,:,1) = pressure_w(:,:,1) - psfc
-        dp(:,:,2:kx-1) = pressure_w(:,:,2:kx-1) - pressure(:,:,1:kx-2)
+        ! Specific humidity
+        q = qvapor/(1 + qvapor)
+
+        ! Pressure differences at half (mass) levels
+        dp(:,:,1) = pressure_w(:,:,1) - psfc(:,:)
+        dp(:,:,2:kx-1) = pressure_w(:,:,2:kx-1) - pressure_w(:,:,1:kx-2)
         dp(:,:,kx) = p_top - pressure_w(:,:,kx-1)
 
         pw = (1 - q)*dp
