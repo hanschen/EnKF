@@ -270,7 +270,7 @@ contains
             ! Get staggered heights for each cycle time.
             ! The wrfinput filename is currently hard-coded, we may want to
             ! make more general later.
-            wrf_file = 'wrfinput_d01_input_' // cycle_num
+            wrf_file = 'wrfinput_d01_' // cycle_num // '_input'
             call get_variable3d(trim(wrf_file), 'PH        ', &
                                 ix, jx, kx+1, 1, ph )
             call get_variable3d(trim(wrf_file), 'PHB       ', &
