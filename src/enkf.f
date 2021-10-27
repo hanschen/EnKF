@@ -140,7 +140,7 @@ integer   :: sist,sied,sjst,sjed, sistart,siend,sjstart,sjend,sis,sie,sjs,sje
 real      :: gaussdev, error, xb
 integer, dimension(8)  :: values
 character (len=10) :: filename, date, time, zone, varname
-character (len=4) :: cycle_num
+character (len=4) :: cycle_num_str
 character (len=20) :: format1
 double precision :: timer,t0,t1,t2,t3,t4,t5
 integer :: grid_id, fid, rcode, num_update_var, assimilated_obs_num, update_flag
@@ -319,13 +319,13 @@ obs_cycle: do ig=1,ceiling(real(obs%num)/nob)
        else if ( obstype(1:5) == 'ideal' ) then
          call xb_to_idealsound(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
        else if ( obstype(1:5) == 'co2t_' ) then
-         cycle_num = obstype(6:9)
-         call xb_to_co2_tower(filename,xob(:,:,:,:,n,sid+1),cycle_num,ix,jx,kx,nv,iob,yasend(iob,ie))
+         cycle_num_str = obstype(6:9)
+         call xb_to_co2_tower(filename,xob(:,:,:,:,n,sid+1),cycle_num_str,ix,jx,kx,nv,iob,yasend(iob,ie))
        else if ( obstype(1:5) == 'co2a_' ) then
          call xb_to_co2_airborne(filename,xob(:,:,:,:,n,sid+1),ix,jx,kx,nv,iob,yasend(iob,ie))
        else if ( obstype(1:5) == 'xco2_' ) then
-         cycle_num = obstype(6:9)
-         call xb_to_xco2_satellite(filename,xob(:,:,:,:,n,sid+1),cycle_num,ix,jx,kx,nv,iob,yasend(iob,ie))
+         cycle_num_str = obstype(6:9)
+         call xb_to_xco2_satellite(filename,xob(:,:,:,:,n,sid+1),cycle_num_str,ix,jx,kx,nv,iob,yasend(iob,ie))
        endif
      endif
    enddo
