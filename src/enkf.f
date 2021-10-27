@@ -759,8 +759,13 @@ enddo update_x_var
    ied = min( update_ie, int(obs%position(iob,1))+var_ngx )
    jst = max( update_js, int(obs%position(iob,2))-var_ngx )
    jed = min( update_je, int(obs%position(iob,2))+var_ngx )
-   kst = max( update_ks, int(obs%position(iob,3))-var_ngz )
-   ked = min( update_ke, int(obs%position(iob,3))+var_ngz )
+   if (var_ngz < 0) then
+       kst = update_ks
+       ked = update_ke
+   else
+       kst = max( update_ks, int(obs%position(iob,3))-var_ngz )
+       ked = min( update_ke, int(obs%position(iob,3))+var_ngz )
+   end if
    update_y_cycle : do iiob=1,obs%num
 ! skip those ya outside update zone
       if ( obs%position(iiob,1)<ist .or. obs%position(iiob,1)>ied .or. &
