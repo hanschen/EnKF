@@ -420,7 +420,7 @@ t0=MPI_Wtime()
    enddo
    if ( update_flag==0 ) cycle update_x_var
 
-   if (varname(1:3) == 'CO2_SF') then
+   if (varname(1:6) == 'CO2_SF') then
       var_ngx = hroi_scaling_factors
       var_ngz = -1
    else
