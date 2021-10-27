@@ -174,7 +174,7 @@ subroutine  read_namelist(ix, jx, kx)
    relax_co2_satellite    = 0.
 
 !-- co2_inversion
-   cycle_num = 0
+   time_window_length = 0
    hroi_scaling_factors = 999
    
 !------------------------------------------------------------------------

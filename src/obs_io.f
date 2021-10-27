@@ -85,7 +85,7 @@ endif
 
 ! CO2 tower data
 if ( use_co2_tower ) then
-    call get_co2_tower_obs ( ix, jx, kx, proj, cycle_num )
+    call get_co2_tower_obs ( ix, jx, kx, proj )
 endif
 
 ! CO2 airborne data
@@ -95,7 +95,7 @@ endif
 
 ! XCO2 satellite data
 if ( use_xco2_satellite ) then
-    call get_xco2_satellite_obs ( proj, cycle_num )
+    call get_xco2_satellite_obs ( proj )
 endif
 
 !  if ( use_radar_rv ) call output_simulated_rv ( "asimulated_rv" )
@@ -280,7 +280,7 @@ obs%num = 0               ! obs%num for all observation, not only Rv
 
 !....... CO2 concentration from towers
    if ( use_co2_tower ) then
-      call sort_co2_tower_data( ix, jx, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower, cycle_num )
+      call sort_co2_tower_data( ix, jx, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower )
    endif
 
 !....... CO2 concentration from airborne observations
@@ -290,7 +290,7 @@ obs%num = 0               ! obs%num for all observation, not only Rv
 
 !....... XCO2 concentration from satellite observations
    if ( use_xco2_satellite ) then
-      call sort_xco2_satellite_data( ix, jx, datathin_xco2_satellite, hroi_xco2_satellite, vroi_xco2_satellite, cycle_num )
+      call sort_xco2_satellite_data( ix, jx, datathin_xco2_satellite, hroi_xco2_satellite, vroi_xco2_satellite )
    endif
 
    if(my_proc_id==0) write(*,*)obs%num,' observation data will be assimilated'

@@ -181,61 +181,77 @@ contains
     ! co2_tower_{cycle}.dat (e.g. co2_tower_0000.dat)
     !
     !--------------------------------------------------------------------------
-    subroutine get_co2_tower_obs(ix, jx, kx, proj, cycle_num)
+    subroutine get_co2_tower_obs(ix, jx, kx, proj)
         implicit none
 
-        integer, intent(in)                         :: ix, jx, kx, cycle_num
+        integer, intent(in)                         :: ix, jx, kx
         type(proj_info), intent(in)                 :: proj
 
         character (len=80)                          :: wrf_file
         real, dimension(ix,jx,kx+1)                 :: ph, phb
-        character (len=4)                           :: cycle_num_str
+        integer                                     :: icycle
+        character (len=4)                           :: cycle_num
         integer                                     :: n, nn
         character (len=80)                          :: input_file
         integer                                     :: ierr
-        integer                                     :: nlines
+        integer                                     :: nlines, nlines_total
 
         character (len=80)                          :: tower_name
         real                                        :: lat, lon, height_msl, co2
 
         real                                        :: aio, ajo, ako
         integer                                     :: io, jo, ko
+        integer                                     :: time_window
 
-        write(cycle_num_str, '(i4.4)') cycle_num
-
-        input_file = 'co2_tower_' // cycle_num_str // ".dat"
-
-        open(10, file=trim(input_file), status='old', form='formatted', &
-             iostat=ierr)
-
-        if (ierr /= 0) then
-            if (my_proc_id == 0) then
-                write(*, *) trim(input_file), ' does not exist.'
-                ! TODO: Fix error message
-                write(*, *) 'Tower CO2 concentration data will not be &
-                            &assimilated!'
-            end if
+        time_window = time_window_length
+        if (time_window == 0) then
+            ! include current time if time_window_length is 0
+            time_window = 1
         end if
 
-        if (my_proc_id == 0) then
-            write(*, *) ''
-            write(*, *) '---------------------------------------------------'
-            write(*, *) '.... Getting tower CO2 data ....'
-        end if
+        allocate(raw%co2_tower%nlines(0:time_window-1))
 
-        nlines = 0
-        do
-            read(10, *, iostat=ierr)
+        nlines_total = 0
+        do icycle = 0, time_window-1
+            write(cycle_num, '(i4.4)') icycle
+            input_file = 'co2_tower_' // cycle_num // ".dat"
+
+            open(10, file=trim(input_file), status='old', form='formatted', &
+                 iostat=ierr)
+
             if (ierr /= 0) then
-                exit
+                if (my_proc_id == 0) then
+                    write(*, *) trim(input_file), ' does not exist.'
+                    ! TODO: Fix error message
+                    write(*, *) 'Tower CO2 concentration data will not be &
+                                &assimilated!'
+                end if
             end if
-            nlines = nlines + 1
+
+            if (my_proc_id == 0) then
+                write(*, *) ''
+                write(*, *) '---------------------------------------------------'
+                write(*, *) '.... Getting tower CO2 data ....'
+            end if
+
+            nlines = 0
+            do
+                read(10, *, iostat=ierr)
+                if (ierr /= 0) then
+                    exit
+                end if
+                nlines = nlines + 1
+            end do
+
+            raw%co2_tower%nlines(icycle) = nlines
+            nlines_total = nlines_total + nlines
+
+            close(10)
         end do
 
-        close(10)
+        raw%co2_tower%num = nlines_total
 
-        raw%co2_tower%num = nlines
-
+        allocate(raw%co2_tower%icycle(raw%co2_tower%num))
         allocate(raw%co2_tower%tower_name(raw%co2_tower%num))
         allocate(raw%co2_tower%latitude(raw%co2_tower%num))
         allocate(raw%co2_tower%longitude(raw%co2_tower%num))
@@ -247,57 +263,63 @@ contains
 
         nn = 1
 
-        ! Get staggered heights for each cycle time.
-        ! The wrfinput filename is currently hard-coded, we may want to
-        ! make more general later.
-        wrf_file = 'wrfinput_d01_' // cycle_num_str // '_input'
-        call get_variable3d(trim(wrf_file), 'PH        ', &
-                            ix, jx, kx+1, 1, ph )
-        call get_variable3d(trim(wrf_file), 'PHB       ', &
-                            ix, jx, kx+1, 1, phb)
-        ph = (ph + phb)/9.8
+        do icycle = 0, time_window-1
+            write(cycle_num, '(i4.4)') icycle
+            input_file = 'co2_tower_' // cycle_num // ".dat"
 
-        open(10, file=trim(input_file), status='old', form='formatted', &
-             iostat=ierr)
+            ! Get staggered heights for each cycle time.
+            ! The wrfinput filename is currently hard-coded, we may want to
+            ! make more general later.
+            wrf_file = 'wrfinput_d01_' // cycle_num // '_input'
+            call get_variable3d(trim(wrf_file), 'PH        ', &
+                                ix, jx, kx+1, 1, ph )
+            call get_variable3d(trim(wrf_file), 'PHB       ', &
+                                ix, jx, kx+1, 1, phb)
+            ph = (ph + phb)/9.8
 
-        if (ierr /= 0) then
-            if (my_proc_id == 0) then
-                write(*, *) trim(input_file), ' does not exist.'
-                ! TODO: Fix error message
-                write(*, *) 'Tower CO2 concentration data will not be &
-                            &assimilated!'
+            open(10, file=trim(input_file), status='old', form='formatted', &
+                 iostat=ierr)
+
+            if (ierr /= 0) then
+                if (my_proc_id == 0) then
+                    write(*, *) trim(input_file), ' does not exist.'
+                    ! TODO: Fix error message
+                    write(*, *) 'Tower CO2 concentration data will not be &
+                                &assimilated!'
+                end if
             end if
-        end if
 
-        do n = 1, raw%co2_tower%num
-            read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
-                 iostat=ierr) tower_name, lat, lon, height_msl, co2
+            do n = 1, raw%co2_tower%nlines(icycle)
+                read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
+                     iostat=ierr) tower_name, lat, lon, height_msl, co2
 
-            raw%co2_tower%tower_name(nn) = tower_name
-            raw%co2_tower%latitude(nn) = lat
-            raw%co2_tower%longitude(nn) = lon
-            raw%co2_tower%height_msl(nn) = height_msl
-            raw%co2_tower%co2(nn) = co2
+                raw%co2_tower%icycle(nn) = icycle
+                raw%co2_tower%tower_name(nn) = tower_name
+                raw%co2_tower%latitude(nn) = lat
+                raw%co2_tower%longitude(nn) = lon
+                raw%co2_tower%height_msl(nn) = height_msl
+                raw%co2_tower%co2(nn) = co2
 
-            call latlon_to_ij(proj, lat, lon, aio, ajo)
-            io = nint(aio)
-            jo = nint(ajo)
-            ako = height_to_k(ph(io,jo,:), height_msl)
+                call latlon_to_ij(proj, lat, lon, aio, ajo)
+                io = nint(aio)
+                jo = nint(ajo)
+                ako = height_to_k(ph(io,jo,:), height_msl)
 
-            raw%co2_tower%ii(nn) = aio
-            raw%co2_tower%jj(nn) = ajo
-            raw%co2_tower%kk(nn) = ako
+                raw%co2_tower%ii(nn) = aio
+                raw%co2_tower%jj(nn) = ajo
+                raw%co2_tower%kk(nn) = ako
 
-            ! Diagnostics
-            ! write(*, *) trim(tower_name)
-            ! write(*, *) lat
-            ! write(*, *) lon
-            ! write(*, *) height_msl
-            ! write(*, *) co2
+                ! Diagnostics
+                ! write(*, *) trim(tower_name)
+                ! write(*, *) lat
+                ! write(*, *) lon
+                ! write(*, *) height_msl
+                ! write(*, *) co2
 
-            nn = nn + 1
+                nn = nn + 1
+            end do
+            close(10)
         end do
-        close(10)
 
         return
 
@@ -323,20 +345,20 @@ contains
     !   Vertical radius of influence in gridpoints.
     !
     !--------------------------------------------------------------------------
-    subroutine sort_co2_tower_data(ix, jx, datathin, hroi, vroi, cycle_num)
+    subroutine sort_co2_tower_data(ix, jx, datathin, hroi, vroi)
         implicit none
 
         real, parameter                      :: HEIGHT_TOLERENCE = 100
         integer, intent(in)                  :: ix, jx
-        integer, intent(in)                  :: datathin, hroi, vroi, cycle_num
+        integer, intent(in)                  :: datathin, hroi, vroi
 
-        character (len=4)                    :: cycle_num_str
+        character (len=4)                    :: cycle_num
         real                                 :: ii, jj, kk
         integer                              :: n
 
-        write(cycle_num_str, '(i4.4)') cycle_num
-
         do n = 1, raw%co2_tower%num
+            write(cycle_num, '(i4.4)') raw%co2_tower%icycle(n)
+
             ii = raw%co2_tower%ii(n)
             jj = raw%co2_tower%jj(n)
             kk = raw%co2_tower%kk(n)
@@ -380,7 +402,7 @@ contains
             if (raw%co2_tower%co2(n) > 0) then
                 obs%num                 = obs%num + 1
                 obs%dat     (obs%num  ) = raw%co2_tower%co2(n)
-                obs%type    (obs%num  ) = 'co2t_' // cycle_num_str
+                obs%type    (obs%num  ) = 'co2t_' // cycle_num
                 obs%err     (obs%num  ) = co2_error_tower
                 obs%position(obs%num,1) = ii
                 obs%position(obs%num,2) = jj
@@ -410,7 +432,7 @@ contains
     !   not a state variable.
     ! xb:
     !   State vector (background or prior).
-    ! cycle_num_str:
+    ! cycle_num:
     !   Cycle number as a string, e.g. '0000'.
     ! ix:
     !   x (longitude) dimension size.
@@ -429,10 +451,10 @@ contains
     !   h(xb) for the current observation.
     !
     !--------------------------------------------------------------------------
-    subroutine xb_to_co2_tower(inputfile, xb, cycle_num_str, ix, jx, kx, nv, iob, hxb)
+    subroutine xb_to_co2_tower(inputfile, xb, cycle_num, ix, jx, kx, nv, iob, hxb)
         implicit none
         character(len=10), intent(in)           :: inputfile
-        character(len=4)                        :: cycle_num_str
+        character(len=4)                        :: cycle_num
         integer, intent(in)                     :: ix, jx, kx, nv, iob
         real, dimension(3,3,kx+1,nv), intent(in) :: xb
         real, intent(out)                       :: hxb
@@ -461,7 +483,7 @@ contains
         dym = real(j1+1) - obs_jj
         dzm = real(k1+1) - obs_kk
 
-        varname = 'CO2_' // cycle_num_str
+        varname = 'CO2_' // cycle_num
 
         do m = 1, nv
             if (trim(enkfvar(m)) == varname) then
@@ -770,18 +792,18 @@ contains
     ! xco2_satellite_{cycle}.dat (e.g. xco2_satellite_0000.dat)
     !
     !--------------------------------------------------------------------------
-    subroutine get_xco2_satellite_obs(proj, cycle_num)
+    subroutine get_xco2_satellite_obs(proj)
         implicit none
 
-        integer, intent(in)                         :: cycle_num
         type(proj_info), intent(in)                 :: proj
 
+        integer                                     :: icycle
+        character (len=4)                           :: cycle_num
         character(len=80)                           :: times
         integer                                     :: n, nn
         character (len=80)                          :: input_file
         integer                                     :: ierr
-        integer                                     :: nlines
-        character (len=4)                           :: cycle_num_str
+        integer                                     :: nlines, nlines_total
 
         character (len=80)                          :: satellite_name
         real                                        :: lat, lon, height_msl, xco2
@@ -790,40 +812,55 @@ contains
         integer                                     :: io, jo, ko
         integer                                     :: time_window
 
-        write(cycle_num_str, '(i4.4)') cycle_num
-        input_file = 'xco2_satellite_' // cycle_num_str // ".dat"
-
-        open(10, file=trim(input_file), status='old', form='formatted', &
-             iostat=ierr)
-
-        if (ierr /= 0) then
-            if (my_proc_id == 0) then
-                write(*, *) trim(input_file), ' does not exist.'
-                ! TODO: Fix error message
-                write(*, *) 'Satellite CO2 concentration data will not be &
-                            &assimilated!'
-            end if
+        time_window = time_window_length
+        if (time_window == 0) then
+            ! include current time if time_window_length is 0
+            time_window = 1
         end if
 
-        if (my_proc_id == 0) then
-            write(*, *) ''
-            write(*, *) '---------------------------------------------------'
-            write(*, *) '.... Getting Satellite XCO2 data ....'
-        end if
+        allocate(raw%xco2_satellite%nlines(0:time_window-1))
 
-        nlines = 0
-        do
-            read(10, *, iostat=ierr)
+        nlines_total = 0
+        do icycle = 0, time_window-1
+            write(cycle_num, '(i4.4)') icycle
+            input_file = 'xco2_satellite_' // cycle_num // ".dat"
+
+            open(10, file=trim(input_file), status='old', form='formatted', &
+                 iostat=ierr)
+
             if (ierr /= 0) then
-                exit
+                if (my_proc_id == 0) then
+                    write(*, *) trim(input_file), ' does not exist.'
+                    ! TODO: Fix error message
+                    write(*, *) 'Satellite CO2 concentration data will not be &
+                                &assimilated!'
+                end if
             end if
-            nlines = nlines + 1
+
+            if (my_proc_id == 0) then
+                write(*, *) ''
+                write(*, *) '---------------------------------------------------'
+                write(*, *) '.... Getting Satellite XCO2 data ....'
+            end if
+
+            nlines = 0
+            do
+                read(10, *, iostat=ierr)
+                if (ierr /= 0) then
+                    exit
+                end if
+                nlines = nlines + 1
+            end do
+
+            raw%xco2_satellite%nlines(icycle) = nlines
+            nlines_total = nlines_total + nlines
+
+            close(10)
         end do
 
-        close(10)
+        raw%xco2_satellite%num = nlines_total
 
-        raw%xco2_satellite%num = nlines
-
+        allocate(raw%xco2_satellite%icycle(raw%xco2_satellite%num))
         allocate(raw%xco2_satellite%satellite_name(raw%xco2_satellite%num))
         allocate(raw%xco2_satellite%latitude(raw%xco2_satellite%num))
         allocate(raw%xco2_satellite%longitude(raw%xco2_satellite%num))
@@ -833,43 +870,49 @@ contains
 
         nn = 1
 
-        open(10, file=trim(input_file), status='old', form='formatted', &
-             iostat=ierr)
+        do icycle = 0, time_window-1
+            write(cycle_num, '(i4.4)') icycle
+            input_file = 'xco2_satellite_' // cycle_num // ".dat"
 
-        if (ierr /= 0) then
-            if (my_proc_id == 0) then
-                write(*, *) trim(input_file), ' does not exist.'
-                ! TODO: Fix error message
-                write(*, *) 'Satellite CO2 concentration data will not be &
-                            &assimilated!'
+            open(10, file=trim(input_file), status='old', form='formatted', &
+                 iostat=ierr)
+
+            if (ierr /= 0) then
+                if (my_proc_id == 0) then
+                    write(*, *) trim(input_file), ' does not exist.'
+                    ! TODO: Fix error message
+                    write(*, *) 'Satellite CO2 concentration data will not be &
+                                &assimilated!'
+                end if
             end if
-        end if
 
-        do n = 1, raw%xco2_satellite%num
-            read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
-                 iostat=ierr) satellite_name, lat, lon, height_msl, xco2
+            do n = 1, raw%xco2_satellite%nlines(icycle)
+                read(10, '(a20, f10.4, f10.4, f7.1, f11.6)', &
+                     iostat=ierr) satellite_name, lat, lon, height_msl, xco2
 
-            raw%xco2_satellite%satellite_name(nn) = satellite_name
-            raw%xco2_satellite%latitude(nn) = lat
-            raw%xco2_satellite%longitude(nn) = lon
-            raw%xco2_satellite%xco2(nn) = xco2
+                raw%xco2_satellite%icycle(nn) = icycle
+                raw%xco2_satellite%satellite_name(nn) = satellite_name
+                raw%xco2_satellite%latitude(nn) = lat
+                raw%xco2_satellite%longitude(nn) = lon
+                raw%xco2_satellite%xco2(nn) = xco2
 
-            call latlon_to_ij(proj, lat, lon, aio, ajo)
-            io = nint(aio)
-            jo = nint(ajo)
+                call latlon_to_ij(proj, lat, lon, aio, ajo)
+                io = nint(aio)
+                jo = nint(ajo)
 
-            raw%xco2_satellite%ii(nn) = aio
-            raw%xco2_satellite%jj(nn) = ajo
+                raw%xco2_satellite%ii(nn) = aio
+                raw%xco2_satellite%jj(nn) = ajo
 
-            ! Diagnostics
-            ! write(*, *) trim(satellite_name)
-            ! write(*, *) lat
-            ! write(*, *) lon
-            ! write(*, *) co2
+                ! Diagnostics
+                ! write(*, *) trim(satellite_name)
+                ! write(*, *) lat
+                ! write(*, *) lon
+                ! write(*, *) co2
 
-            nn = nn + 1
+                nn = nn + 1
+            end do
+            close(10)
         end do
-        close(10)
 
         return
 
@@ -895,19 +938,19 @@ contains
     !   Vertical radius of influence in gridpoints.
     !
     !--------------------------------------------------------------------------
-    subroutine sort_xco2_satellite_data(ix, jx, datathin, hroi, vroi, cycle_num)
+    subroutine sort_xco2_satellite_data(ix, jx, datathin, hroi, vroi)
         implicit none
 
         integer, intent(in)                  :: ix, jx
-        integer, intent(in)                  :: datathin, hroi, vroi, cycle_num
+        integer, intent(in)                  :: datathin, hroi, vroi
 
-        character (len=4)                    :: cycle_num_str
+        character (len=4)                    :: cycle_num
         real                                 :: ii, jj, kk
         integer                              :: n
 
-        write(cycle_num_str, '(i4.4)') cycle_num
-
         do n = 1, raw%xco2_satellite%num
+            write(cycle_num, '(i4.4)') raw%xco2_satellite%icycle(n)
+
             ii = raw%xco2_satellite%ii(n)
             jj = raw%xco2_satellite%jj(n)
 
@@ -925,7 +968,7 @@ contains
             if (raw%xco2_satellite%xco2(n) > 0) then
                 obs%num                 = obs%num + 1
                 obs%dat     (obs%num  ) = raw%xco2_satellite%xco2(n)
-                obs%type    (obs%num  ) = 'xco2_' // cycle_num_str
+                obs%type    (obs%num  ) = 'xco2_' // cycle_num
                 obs%err     (obs%num  ) = xco2_error_satellite
                 obs%position(obs%num,1) = ii
                 obs%position(obs%num,2) = jj
@@ -974,10 +1017,10 @@ contains
     !   h(xb) for the current observation.
     !
     !--------------------------------------------------------------------------
-    subroutine xb_to_xco2_satellite(inputfile, xb, cycle_num_str, ix, jx, kx, nv, iob, hxb)
+    subroutine xb_to_xco2_satellite(inputfile, xb, cycle_num, ix, jx, kx, nv, iob, hxb)
         implicit none
         character(len=10), intent(in)           :: inputfile
-        character(len=4)                        :: cycle_num_str
+        character(len=4)                        :: cycle_num
         integer, intent(in)                     :: ix, jx, kx, nv, iob
         real, dimension(3,3,kx+1,nv), intent(in) :: xb
         real, intent(out)                       :: hxb
@@ -1001,7 +1044,7 @@ contains
         dxm = real(i1+1) - obs_ii
         dym = real(j1+1) - obs_jj
 
-        varname = 'CO2_' // cycle_num_str
+        varname = 'CO2_' // cycle_num
 
         xco2 = calc_xco2(inputfile, varname, i1, j1, kx)
 
