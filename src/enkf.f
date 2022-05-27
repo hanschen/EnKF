@@ -420,8 +420,8 @@ t0=MPI_Wtime()
    enddo
    if ( update_flag==0 ) cycle update_x_var
 
-   if (varname(1:6) == 'CO2_SF') then
-      var_ngx = hroi_scaling_factors
+   if (varname(1:5) == 'CO2p_') then
+      var_ngx = hroi_parameters
       var_ngz = -1
    else
       var_ngx = ngx
@@ -586,13 +586,13 @@ t0=MPI_Wtime()
    do i = uist,uied
      call corr(real(i-obs%position(iob,1)),real(j-obs%position(iob,2)),real(k-obs%position(iob,3)),var_ngx,var_ngz,corr_coef)
      if ( obstype == 'longtitude' .or. obstype == 'latitude  ' ) corr_coef = 1.0
-     if (varname(1:6) == 'CO2_SF') then
+     if (varname(1:5) == 'CO2p_') then
          if ( obstype(1:5) == 'co2t_' ) then
-             corr_coef = (1 - relax_sf_tower)*corr_coef
+             corr_coef = (1 - relax_parameters_tower)*corr_coef
          else if ( obstype(1:5) == 'co2a_' ) then
-             corr_coef = (1 - relax_sf_airborne)*corr_coef
+             corr_coef = (1 - relax_parameters_airborne)*corr_coef
          else if ( obstype(1:5) == 'xco2_' ) then
-             corr_coef = (1 - relax_sf_satellite)*corr_coef
+             corr_coef = (1 - relax_parameters_satellite)*corr_coef
          end if
      else if (varname(1:3) == 'CO2') then
          if ( obstype(1:5) == 'co2t_' ) then

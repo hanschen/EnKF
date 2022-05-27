@@ -152,7 +152,7 @@ subroutine  read_namelist(ix, jx, kx)
    hroi_co2_tower     = 999
    vroi_co2_tower     = 999
    co2_error_tower    = 1.
-   relax_sf_tower     = 0.
+   relax_parameters_tower = 0.
    relax_co2_tower    = 0.
 
 !-- use_co2_airborne
@@ -161,7 +161,7 @@ subroutine  read_namelist(ix, jx, kx)
    hroi_co2_airborne     = 999
    vroi_co2_airborne     = 999
    co2_error_airborne    = 1.
-   relax_sf_airborne     = 0.
+   relax_parameters_airborne = 0.
    relax_co2_airborne    = 0.
 
 !-- use_xco2_satellite
@@ -170,12 +170,12 @@ subroutine  read_namelist(ix, jx, kx)
    hroi_xco2_satellite     = 999
    vroi_xco2_satellite     = 999
    xco2_error_satellite    = 0.1
-   relax_sf_satellite     = 0.
+   relax_parameters_satellite = 0.
    relax_co2_satellite    = 0.
 
 !-- co2_inversion
    time_window_length = 0
-   hroi_scaling_factors = 999
+   hroi_parameters = 999
    
 !------------------------------------------------------------------------
 !  [2.0] read namelist 
@@ -696,7 +696,7 @@ subroutine wrf_var_dimension ( wrf_file, var, ix, jx, kx, ii, jj, kk )
         .or. var == 'XLAND     ' .or. var == 'PBLH      ' .or. var == 'HFX       '  &
         .or. var == 'QFX       ' .or. var == 'LH        ' .or. var == 'SNOWC     '  &
         .or. var == 'SR        ' .or. var == 'POTEVP    ' .or. var == 'U10       '  &
-        .or. var == 'V10       ' .or. var == 'CO2_SF    ' .or. var == 'CO2_SF_FF ') then
+        .or. var == 'V10       ' .or. var(1:5) == 'CO2p_') then
       kk = 1
    else if ( var == 'MAPFAC_U  ' ) then
       kk = 1

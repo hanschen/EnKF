@@ -163,7 +163,7 @@ module namelist_define
    integer       :: hroi_co2_tower      ! horizontal radius of influence for CO2 tower
    integer       :: vroi_co2_tower      ! vertical radius of influence for CO2 tower
    real          :: co2_error_tower     ! error of CO2 tower obs (ppm)
-   real          :: relax_sf_tower      ! fraction to relax xa to xb for scaling factors for CO2 tower obs
+   real          :: relax_parameters_tower ! fraction to relax xa to xb for flux parameters for CO2 tower obs
    real          :: relax_co2_tower     ! fraction to relax xa to xb for CO2 for CO2 tower obs
 
 !-- use_co2_airborne
@@ -174,7 +174,7 @@ module namelist_define
    integer       :: hroi_co2_airborne      ! horizontal radius of influence for CO2 airborne obs
    integer       :: vroi_co2_airborne      ! vertical radius of influence for CO2 airborne obs
    real          :: co2_error_airborne     ! error of CO2 airborne obs (ppm)
-   real          :: relax_sf_airborne      ! fraction to relax xa to xb for scaling factors for CO2 airborne obs
+   real          :: relax_parameters_airborne ! fraction to relax xa to xb for flux parameters for CO2 airborne obs
    real          :: relax_co2_airborne     ! fraction to relax xa to xb for CO2 for CO2 airborne obs
 
 !-- use_xco2_satellite
@@ -186,11 +186,11 @@ module namelist_define
    integer       :: vroi_xco2_satellite    ! vertical radius of influence for XCO2 satellite obs
                                            ! (currently not implemented)
    real          :: xco2_error_satellite   ! error of XCO2 satellite obs (ppm)
-   real          :: relax_sf_satellite      ! fraction to relax xa to xb for scaling factors for XCO2 satellite obs
-   real          :: relax_co2_satellite     ! fraction to relax xa to xb for CO2 for XCO2 satellite obs
+   real          :: relax_parameters_satellite ! fraction to relax xa to xb for flux parameters for XCO2 satellite obs
+   real          :: relax_co2_satellite    ! fraction to relax xa to xb for CO2 for XCO2 satellite obs
 
 !-- co2_inversion
-   integer       :: hroi_scaling_factors  ! horizontal radius of influence for CO2 scaling factors
+   integer       :: hroi_parameters       ! horizontal radius of influence for CO2 flux parameters
    integer       :: time_window_length    ! number of past cycles to include in inversion time window
 
 !-- Namelist contents :
@@ -215,12 +215,12 @@ module namelist_define
    namelist /radar_obs      / radar_number, use_radar_rf, use_radar_rv, datathin_radar, hroi_radar, vroi_radar
    namelist /airborne_radar / use_airborne_rf, use_airborne_rv, datathin_airborne, hroi_airborne, vroi_airborne
    namelist /co2_tower_obs  / use_co2_tower, datathin_co2_tower, hroi_co2_tower, vroi_co2_tower, &
-                              co2_error_tower, relax_sf_tower, relax_co2_tower
+                              co2_error_tower, relax_parameters_tower, relax_co2_tower
    namelist /co2_airborne_obs  / use_co2_airborne, datathin_co2_airborne, hroi_co2_airborne, vroi_co2_airborne, &
-                                 co2_error_airborne, relax_sf_airborne, relax_co2_airborne
+                                 co2_error_airborne, relax_parameters_airborne, relax_co2_airborne
    namelist /xco2_satellite_obs  / use_xco2_satellite, datathin_xco2_satellite, hroi_xco2_satellite, vroi_xco2_satellite, &
-                                 xco2_error_satellite, relax_sf_satellite, relax_co2_satellite
-   namelist /co2_inversion  / hroi_scaling_factors, time_window_length
+                                 xco2_error_satellite, relax_parameters_satellite, relax_co2_satellite
+   namelist /co2_inversion  / hroi_parameters, time_window_length
 
 
 end module namelist_define
