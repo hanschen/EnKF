@@ -545,7 +545,7 @@ contains
         integer                                     :: io, jo, ko
 
         input_file = 'airborne_' // times(1:4) // times(6:7) // &
-                     times(9:10) // & times(12:13) // times(15:16) // &
+                     times(9:10) // times(12:13) // times(15:16) // &
                      times(18:19) // ".dat"
         open(10, file=trim(input_file), status='old', form='formatted', &
              iostat=ierr)
