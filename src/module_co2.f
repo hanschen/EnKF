@@ -1027,7 +1027,7 @@ contains
 
         character(len=8)                        :: varname
         real, dimension(ix,jx,kx)               :: co2
-        real, dimension(ix,jx)                  :: xco2
+        real, dimension(2,2)                    :: xco2
         integer                                 :: m
         real                                    :: obs_ii, obs_jj
         integer                                 :: i1, j1, k1
